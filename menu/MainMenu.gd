@@ -1,6 +1,6 @@
 extends Control
 
-var Star = preload("res://Star.tscn")
+var Star = preload("res://menu/Star.tscn")
 
 var star_percent = 0.0007
 var rng = RandomNumberGenerator.new()
