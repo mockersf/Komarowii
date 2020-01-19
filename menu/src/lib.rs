@@ -40,6 +40,18 @@ macro_rules! min {
     }}
 }
 
+/// List of known signals used from Godot
+enum Signal {
+    ScreenExited,
+}
+impl From<Signal> for GodotString {
+    fn from(signal: Signal) -> Self {
+        match signal {
+            Signal::ScreenExited => "screen_exited".into(),
+        }
+    }
+}
+
 mod star;
 
 fn init(handle: gdnative::init::InitHandle) {

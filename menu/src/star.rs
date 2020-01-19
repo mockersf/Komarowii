@@ -31,7 +31,7 @@ impl Star {
         unsafe {
             if let Some(mut visi) = owner.get_node("Star/VisibilityNotifier2D".into()) {
                 visi.connect(
-                    "screen_exited".into(),
+                    crate::Signal::ScreenExited.into(),
                     Some(owner.to_object()),
                     "_on_visibility_screen_exited".into(),
                     VariantArray::new(),
