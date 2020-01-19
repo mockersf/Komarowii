@@ -44,7 +44,7 @@ macro_rules! min {
 macro_rules! stringify_fn {
     ($owner:ident, $fn:ident) => {{
         let _ = $owner::$fn;
-        stringify!(fn).into()
+        stringify!($fn).into()
     }};
 }
 
@@ -82,5 +82,17 @@ mod test {
     fn macro_min() {
         assert_eq!(min!(3.3, 5.2), 3.3);
         assert_eq!(min!(5.7, 5.2), 5.2);
+    }
+
+    #[test]
+    fn macro_stringify_fn() {
+        struct Test;
+        impl Test {
+            fn zut(self) {
+                unimplemented!()
+            }
+        }
+        let stringified_fn: &str = stringify_fn!(Test, zut);
+        assert_eq!(stringified_fn, "zut");
     }
 }
