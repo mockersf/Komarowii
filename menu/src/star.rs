@@ -33,7 +33,7 @@ impl Star {
                 visi.connect(
                     crate::Signal::ScreenExited.into(),
                     Some(owner.to_object()),
-                    "_on_visibility_screen_exited".into(),
+                    stringify_fn!(_on_visibility_screen_exited).into(),
                     VariantArray::new(),
                     0,
                 )
