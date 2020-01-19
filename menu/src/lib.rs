@@ -40,11 +40,11 @@ macro_rules! min {
     }}
 }
 
-/// Check that a function exists in Self before stringifying it
+/// Check that a function exists in owner before stringifying it
 macro_rules! stringify_fn {
-    ($x:ident) => {{
-        let _ = Self::$x;
-        stringify!($x)
+    ($owner:ident, $fn:ident) => {{
+        let _ = $owner::$fn;
+        stringify!(fn).into()
     }};
 }
 
