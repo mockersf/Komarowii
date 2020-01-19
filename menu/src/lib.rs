@@ -49,3 +49,18 @@ fn init(handle: gdnative::init::InitHandle) {
 godot_gdnative_init!();
 godot_nativescript_init!(init);
 godot_gdnative_terminate!();
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn macro_max() {
+        assert_eq!(max!(3.3, 5.2), 5.2);
+        assert_eq!(max!(5.7, 5.2), 5.7);
+    }
+
+    #[test]
+    fn macro_min() {
+        assert_eq!(min!(3.3, 5.2), 3.3);
+        assert_eq!(min!(5.7, 5.2), 5.2);
+    }
+}
