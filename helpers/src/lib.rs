@@ -71,11 +71,14 @@ pub enum Signal {
     ScreenExited,
     /// When button is pressed, from a BaseButton
     Pressed,
+    /// area_entered
+    AreaEntered,
 }
 impl Copy for Signal {}
 impl From<Signal> for GodotString {
     fn from(signal: Signal) -> Self {
         match signal {
+            Signal::AreaEntered => "area_entered".into(),
             Signal::ScreenExited => "screen_exited".into(),
             Signal::Pressed => "pressed".into(),
         }
