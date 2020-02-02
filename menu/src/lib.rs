@@ -48,22 +48,37 @@ macro_rules! stringify_fn {
     }};
 }
 
+/// Load a scene from it's path
+pub fn load_scene(path: &str) -> Option<PackedScene> {
+    ResourceLoader::godot_singleton()
+        .load(
+            GodotString::from_str(path),
+            GodotString::from_str("PackedScene"),
+            false,
+        )
+        .and_then(|s| s.cast::<PackedScene>())
+}
+
 /// List of known signals used from Godot
 enum Signal {
     ScreenExited,
+    Pressed,
 }
 impl From<Signal> for GodotString {
     fn from(signal: Signal) -> Self {
         match signal {
             Signal::ScreenExited => "screen_exited".into(),
+            Signal::Pressed => "pressed".into(),
         }
     }
 }
 
+mod menu;
 mod star;
 
 fn init(handle: gdnative::init::InitHandle) {
     handle.add_class::<star::Star>();
+    handle.add_class::<menu::Menu>();
 }
 
 godot_gdnative_init!();
