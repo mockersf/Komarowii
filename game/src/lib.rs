@@ -16,9 +16,11 @@
 
 use gdnative::*;
 
+mod game;
 mod stellar_object;
 
 fn init(handle: gdnative::init::InitHandle) {
+    handle.add_class::<game::Game>();
     handle.add_class::<stellar_object::StellarObject>();
 }
 

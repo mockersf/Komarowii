@@ -2,7 +2,7 @@ use gdnative::*;
 
 use helpers::stringify_fn;
 
-type OwnerNode = Control;
+type OwnerNode = Area2D;
 
 #[derive(NativeClass)]
 #[inherit(OwnerNode)]
