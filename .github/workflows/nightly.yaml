@@ -60,12 +60,18 @@ jobs:
       - name: Build release
         if: env.LAST_BUILD != github.sha
         run: cargo make build-release
+      - name: Prepare libraries for artifact upload
+        if: env.LAST_BUILD != github.sha
+        shell: bash
+        run: |
+          mkdir -p libs-macos
+          mv target/release/*.dylib libs-macos
       - name: Upload release library (macOS)
         if: env.LAST_BUILD != github.sha
         uses: actions/upload-artifact@v1
         with:
           name: libs-macos
-          path: target/release/libmenu.dylib
+          path: libs-macos
 
   export:
     needs: ["build-as-release-macOS", "tests", "get-last-build"]
