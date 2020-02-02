@@ -3,6 +3,8 @@
 use gdnative::*;
 use rand::Rng;
 
+use helpers::{max, min, stringify_fn};
+
 /// probability a star will die
 const DEATH_PROBABILITY: f32 = 0.00001;
 /// probability a star will change brightness
@@ -33,7 +35,7 @@ impl Star {
         unsafe {
             if let Some(mut visi) = owner.get_node("Star/VisibilityNotifier2D".into()) {
                 visi.connect(
-                    crate::Signal::ScreenExited.into(),
+                    helpers::Signal::ScreenExited.into(),
                     Some(owner.to_object()),
                     stringify_fn!(Self, _on_visibility_screen_exited),
                     VariantArray::new(),

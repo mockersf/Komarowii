@@ -2,6 +2,8 @@ use euclid::vec2;
 use gdnative::*;
 use rand::Rng;
 
+use helpers::stringify_fn;
+
 /// probability there will be a star at any point
 const STAR_PROBABILITY: f32 = 0.0007;
 
@@ -60,7 +62,7 @@ impl Menu {
     fn _init(_owner: OwnerNode) -> Self {
         Menu {
             rng: rand::thread_rng(),
-            star_scene: crate::load_scene("res://menu/Star.tscn"),
+            star_scene: helpers::load_scene("res://menu/Star.tscn"),
         }
     }
 
@@ -69,7 +71,7 @@ impl Menu {
         unsafe {
             if let Some(mut visi) = owner.get_node("Menu/MarginContainer2/Start".into()) {
                 visi.connect(
-                    crate::Signal::Pressed.into(),
+                    helpers::Signal::Pressed.into(),
                     Some(owner.to_object()),
                     stringify_fn!(Self, _start_game),
                     VariantArray::new(),
