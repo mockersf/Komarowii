@@ -58,5 +58,5 @@ jobs:
           override: true
       - uses: davidB/rust-cargo-make@v1
       - uses: actions/checkout@v1
-      - name: Run tests
+      - name: Check dependencies
         run: cargo make dependencies-deny
