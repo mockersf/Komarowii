@@ -1,0 +1,16 @@
+[tasks.install-deny]
+description = "Installs cargo deny."
+category = "Test"
+install_crate = { crate_name = "cargo-deny", binary = "cargo-deny", test_arg = "--help" }
+install_crate_args = ["cargo-deny"]
+args = [ "deny", "--help" ]
+
+[tasks.dependencies-deny]
+description = "Runs cargo deny."
+category = "Test"
+workspace = false
+dependencies = [
+    "install-deny"
+]
+command = "cargo"
+args = ["deny", "check"]

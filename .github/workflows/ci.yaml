@@ -47,3 +47,14 @@ jobs:
           CARGO_MAKE_RUN_CODECOV: "true"
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  check-dependencies:
+    runs-on: "ubunti-latest"
+    steps:
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: "stable"
+          override: true
+      - uses: davidB/rust-cargo-make@v1
+      - uses: actions/checkout@v1
+      - name: Run tests
+        run: cargo make dependencies-deny
