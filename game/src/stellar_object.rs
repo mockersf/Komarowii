@@ -19,7 +19,7 @@ impl StellarObject {
     #[export]
     fn _ready(&mut self, mut owner: OwnerNode) {
         unsafe {
-            let target = owner.clone();
+            let target = owner;
             owner
                 .connect(
                     helpers::Signal::AreaEntered.into(),
