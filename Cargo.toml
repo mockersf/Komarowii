@@ -4,5 +4,6 @@ members = [
     "helpers",
     "menu",
     "game",
+    "data_parser",
 ]
 
