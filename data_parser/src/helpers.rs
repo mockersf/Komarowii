@@ -1,8 +1,8 @@
 use nom::{
     branch::alt,
+    bytes::complete::tag,
     bytes::complete::take_until,
-    bytes::complete::{escaped, tag},
-    character::complete::{alphanumeric1, char, digit1, line_ending, one_of, space1, tab},
+    character::complete::{alphanumeric1, char, digit1, line_ending, space1, tab},
     combinator::cut,
     error::{context, ParseError},
     sequence::{preceded, terminated, tuple},
@@ -30,15 +30,11 @@ pub fn date<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Date
     Ok((input, Date { day, month, year }))
 }
 
-fn parse_str<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
-    escaped(alt((alphanumeric1, space1)), '\\', one_of("\"n\\"))(input)
-}
-
 pub fn string<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
     context(
         "\"-delimited string",
         alt((
-            preceded(char('"'), cut(terminated(parse_str, char('"')))),
+            preceded(char('"'), cut(terminated(take_until("\""), char('"')))),
             alphanumeric1,
             preceded(char('`'), cut(terminated(take_until("`"), char('`')))),
         )),
@@ -57,7 +53,10 @@ where
 pub fn comment_hole<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, (), E> {
     context(
         "comment to ignore",
-        tuple((tag("// "), terminated(take_until("\n"), line_ending))),
+        alt((
+            tuple((tag("//"), terminated(take_until("\n"), line_ending))),
+            tuple((tag("#"), terminated(take_until("\n"), line_ending))),
+        )),
     )(input)
     .map(|(remaining, _)| (remaining, ()))
 }
