@@ -2,7 +2,7 @@ use nom::{
     branch::permutation,
     bytes::complete::tag,
     character::complete::{line_ending, space1, tab},
-    error::context,
+    error::{context, ParseError},
     multi::count,
     number::complete::float,
     sequence::tuple,
@@ -12,7 +12,7 @@ use nom::{
 use crate::helpers::{date, indent_tab_or_4_space, integer, string};
 use crate::types::{Account, Date, Mortgage, Start};
 
-pub fn parse_start<'a>(input: &'a str) -> IResult<&'a str, Start<'a>> {
+pub fn parse_start<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Start<'a>, E> {
     let (input, _) = tuple((tag("start"), line_ending))(input)?;
     let (input, (system, planet, date, set, account)) = permutation((
         parse_system,
@@ -34,7 +34,7 @@ pub fn parse_start<'a>(input: &'a str) -> IResult<&'a str, Start<'a>> {
     ))
 }
 
-fn parse_account<'a>(input: &'a str) -> IResult<&'a str, Account> {
+fn parse_account<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Account, E> {
     let (input, _) = tuple((tab, tag("account"), line_ending))(input)?;
     let (input, (credits, score, mortgage)) =
         permutation((parse_credits, parse_score, parse_mortgage))(input)?;
@@ -49,7 +49,7 @@ fn parse_account<'a>(input: &'a str) -> IResult<&'a str, Account> {
     ))
 }
 
-fn parse_mortgage<'a>(input: &'a str) -> IResult<&'a str, Mortgage> {
+fn parse_mortgage<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Mortgage, E> {
     let (input, _) = tuple((
         tab,
         tab,
@@ -87,6 +87,9 @@ crate::parse_item_with_indent!(3, parse_term, term, integer, u16);
 #[cfg(test)]
 mod test {
     use super::*;
+
+    use nom::error::VerboseError;
+
     #[test]
     fn can_parse_start() {
         let data = r#"start
@@ -103,7 +106,7 @@ mod test {
             term 365
 "#;
 
-        let parsed = dbg!(parse_start(&data));
+        let parsed = dbg!(parse_start::<VerboseError<&str>>(&data));
         assert!(parsed.is_ok());
         let start = parsed.unwrap().1;
         assert_eq!(start.system, String::from("my system"));

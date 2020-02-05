@@ -2,7 +2,7 @@ use nom::{
     branch::permutation,
     bytes::complete::tag,
     character::complete::{line_ending, space1, tab},
-    error::context,
+    error::{context, ParseError},
     multi::{count, many1},
     number::complete::float,
     sequence::tuple,
@@ -12,18 +12,24 @@ use nom::{
 use crate::helpers::{indent_tab_or_4_space, integer, string};
 use crate::types::{Fleet, Planet, Tribute};
 
-pub fn parse_planet<'a>(input: &'a str) -> IResult<&'a str, Planet<'a>> {
-    let (input, (_, _, name, _)) = tuple((tag("planet"), space1, string, line_ending))(input)?;
+pub fn parse_planet<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Planet<'a>, E> {
+    let (input, (_, _, name, _)) = context(
+        "planet tag",
+        tuple((tag("planet"), space1, string, line_ending)),
+    )(input)?;
     let (input, (description, spaceport, shipyard, outfitter, bribe, security, tribute)) =
-        permutation((
-            many1(parse_description),
-            many1(parse_spaceport),
-            many1(parse_shipyard),
-            many1(parse_outfitter),
-            parse_bribe,
-            parse_security,
-            parse_tribute,
-        ))(input)?;
+        context(
+            "planet fields",
+            permutation((
+                many1(parse_description),
+                many1(parse_spaceport),
+                many1(parse_shipyard),
+                many1(parse_outfitter),
+                parse_bribe,
+                parse_security,
+                parse_tribute,
+            )),
+        )(input)?;
 
     Ok((
         input,
@@ -40,7 +46,7 @@ pub fn parse_planet<'a>(input: &'a str) -> IResult<&'a str, Planet<'a>> {
     ))
 }
 
-fn parse_tribute<'a>(input: &'a str) -> IResult<&'a str, Tribute<'a>> {
+fn parse_tribute<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Tribute<'a>, E> {
     let (input, (_, _, _, value, _)) =
         tuple((tab, tag("tribute"), space1, integer, line_ending))(input)?;
 
@@ -56,7 +62,7 @@ fn parse_tribute<'a>(input: &'a str) -> IResult<&'a str, Tribute<'a>> {
     ))
 }
 
-fn parse_fleet<'a>(input: &'a str) -> IResult<&'a str, Fleet<'a>> {
+fn parse_fleet<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Fleet<'a>, E> {
     let (input, (_, _, _, _, kind, _, count)) =
         tuple((tab, tab, tag("fleet"), space1, string, space1, integer))(input)?;
 
@@ -75,6 +81,9 @@ crate::parse_item_with_indent!(2, parse_threshold, threshold, integer, u32);
 #[cfg(test)]
 mod test {
     use super::*;
+
+    use nom::error::VerboseError;
+
     #[test]
     fn can_parse_planet() {
         let data = r#"planet MyPlanet
@@ -92,7 +101,7 @@ mod test {
 		fleet "Impressive Fleet" 18
 "#;
 
-        let parsed = dbg!(parse_planet(&data));
+        let parsed = dbg!(parse_planet::<VerboseError<&str>>(&data));
         assert!(parsed.is_ok());
         let planet = parsed.unwrap().1;
 

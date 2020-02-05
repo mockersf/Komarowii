@@ -1,4 +1,7 @@
-use nom::{branch::alt, character::complete::line_ending, combinator::all_consuming, multi::many1};
+use nom::{
+    branch::alt, character::complete::line_ending, combinator::all_consuming, error::ParseError,
+    multi::many1, IResult,
+};
 
 mod types;
 pub use types::*;
@@ -8,7 +11,15 @@ mod helpers;
 mod planet;
 mod start;
 
-pub fn parse<'a>(input: &'a str) -> Result<Vec<Object<'a>>, ()> {
+pub fn parse<'a>(input: &'a str) -> Vec<Object<'a>> {
+    validate::<(&str, nom::error::ErrorKind)>(input)
+        .map(|(_, data)| data)
+        .unwrap_or_else(|_| vec![])
+}
+
+pub fn validate<'a, E: ParseError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, Vec<Object<'a>>, E> {
     all_consuming(many1(alt((
         |input| {
             start::parse_start(input).map(|(input, parsed)| (input, Some(Object::Start(parsed))))
@@ -19,17 +30,23 @@ pub fn parse<'a>(input: &'a str) -> Result<Vec<Object<'a>>, ()> {
         |input| line_ending(input).map(|(input, _)| (input, None)),
         |input| helpers::comment_hole(input).map(|(input, _)| (input, None)),
     ))))(input)
-    .map_err(|_err| ())
-    .map(|(_, data)| data.into_iter().filter_map(|data| data).collect())
+    .map(|(remaining, parsed)| {
+        (
+            remaining,
+            parsed.into_iter().filter_map(|object| object).collect(),
+        )
+    })
 }
 
 #[cfg(test)]
 mod test {
-    use super::parse;
+    use super::validate;
+
+    use nom::error::VerboseError;
 
     #[test]
     fn will_fail_for_empty_input() {
-        assert!(parse("").is_err())
+        assert!(validate::<VerboseError<&str>>("").is_err())
     }
 
     #[test]
@@ -64,7 +81,7 @@ start
 			interest 0.005
             term 365
 "#;
-        let parsed = dbg!(parse(data));
+        let parsed = dbg!(validate::<VerboseError<&str>>(data));
         assert!(parsed.is_ok());
     }
 }
