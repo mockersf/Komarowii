@@ -12,7 +12,7 @@ use nom::{
 use crate::helpers::{date, indent_tab_or_4_space, integer, string};
 use crate::types::{Account, Date, Mortgage, Start};
 
-pub fn parse_start(input: &str) -> IResult<&str, Start> {
+pub fn parse_start<'a>(input: &'a str) -> IResult<&'a str, Start<'a>> {
     let (input, _) = tuple((tag("start"), line_ending))(input)?;
     let (input, (system, planet, date, set, account)) = permutation((
         parse_system,
@@ -26,15 +26,15 @@ pub fn parse_start(input: &str) -> IResult<&str, Start> {
         input,
         Start {
             date,
-            system: String::from(system),
-            planet: String::from(planet),
-            account: account,
-            set: String::from(set),
+            system,
+            planet,
+            account,
+            set,
         },
     ))
 }
 
-fn parse_account(input: &str) -> IResult<&str, Account> {
+fn parse_account<'a>(input: &'a str) -> IResult<&'a str, Account> {
     let (input, _) = tuple((tab, tag("account"), line_ending))(input)?;
     let (input, (credits, score, mortgage)) =
         permutation((parse_credits, parse_score, parse_mortgage))(input)?;
@@ -49,7 +49,7 @@ fn parse_account(input: &str) -> IResult<&str, Account> {
     ))
 }
 
-fn parse_mortgage(input: &str) -> IResult<&str, Mortgage> {
+fn parse_mortgage<'a>(input: &'a str) -> IResult<&'a str, Mortgage> {
     let (input, _) = tuple((
         tab,
         tab,
@@ -67,14 +67,14 @@ fn parse_mortgage(input: &str) -> IResult<&str, Mortgage> {
         Mortgage {
             principal,
             interest,
-            term: term,
+            term,
         },
     ))
 }
 
-crate::parse_item_with_indent!(1, parse_system, system, string, &str);
-crate::parse_item_with_indent!(1, parse_set, set, string, &str);
-crate::parse_item_with_indent!(1, parse_planet, planet, string, &str);
+crate::parse_item_with_indent!(1, parse_system, system, string, &'a str);
+crate::parse_item_with_indent!(1, parse_set, set, string, &'a str);
+crate::parse_item_with_indent!(1, parse_planet, planet, string, &'a str);
 crate::parse_item_with_indent!(1, parse_date, date, date, Date);
 
 crate::parse_item_with_indent!(2, parse_credits, credits, integer, u64);

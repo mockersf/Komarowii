@@ -20,41 +20,41 @@ pub struct Date {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Fleet {
-    pub kind: String,
+pub struct Fleet<'a> {
+    pub kind: &'a str,
     pub count: u16,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Tribute {
+pub struct Tribute<'a> {
     pub value: u32,
     pub threshold: u32,
-    pub fleet: Fleet,
+    pub fleet: Fleet<'a>,
 }
 
 #[derive(Debug)]
-pub struct Start {
+pub struct Start<'a> {
     pub date: Date,
-    pub system: String,
-    pub planet: String,
+    pub system: &'a str,
+    pub planet: &'a str,
     pub account: Account,
-    pub set: String,
+    pub set: &'a str,
 }
 
 #[derive(Debug)]
-pub struct Planet {
-    pub name: String,
-    pub description: String,
-    pub spaceport: String,
-    pub shipyard: Vec<String>,
-    pub outfitter: Vec<String>,
+pub struct Planet<'a> {
+    pub name: &'a str,
+    pub description: Vec<&'a str>,
+    pub spaceport: Vec<&'a str>,
+    pub shipyard: Vec<&'a str>,
+    pub outfitter: Vec<&'a str>,
     pub bribe: f32,
     pub security: f32,
-    pub tribute: Tribute,
+    pub tribute: Tribute<'a>,
 }
 
 #[derive(Debug)]
-pub enum Object {
-    Start(Start),
-    Planet(Planet),
+pub enum Object<'a> {
+    Start(Start<'a>),
+    Planet(Planet<'a>),
 }

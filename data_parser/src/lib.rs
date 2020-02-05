@@ -8,7 +8,7 @@ mod helpers;
 mod planet;
 mod start;
 
-pub fn parse(input: &str) -> Result<Vec<Object>, ()> {
+pub fn parse<'a>(input: &'a str) -> Result<Vec<Object<'a>>, ()> {
     all_consuming(many1(alt((
         |input| {
             start::parse_start(input).map(|(input, parsed)| (input, Some(Object::Start(parsed))))

@@ -12,7 +12,7 @@ use nom::{
 use crate::helpers::{indent_tab_or_4_space, integer, string};
 use crate::types::{Fleet, Planet, Tribute};
 
-pub fn parse_planet(input: &str) -> IResult<&str, Planet> {
+pub fn parse_planet<'a>(input: &'a str) -> IResult<&'a str, Planet<'a>> {
     let (input, (_, _, name, _)) = tuple((tag("planet"), space1, string, line_ending))(input)?;
     let (input, (description, spaceport, shipyard, outfitter, bribe, security, tribute)) =
         permutation((
@@ -28,11 +28,11 @@ pub fn parse_planet(input: &str) -> IResult<&str, Planet> {
     Ok((
         input,
         Planet {
-            name: String::from(name),
-            description: description.join("\n"),
-            spaceport: spaceport.join("\n"),
-            shipyard: shipyard.into_iter().map(|s| String::from(s)).collect(),
-            outfitter: outfitter.into_iter().map(|s| String::from(s)).collect(),
+            name,
+            description,
+            spaceport,
+            shipyard,
+            outfitter,
             bribe,
             security,
             tribute,
@@ -40,7 +40,7 @@ pub fn parse_planet(input: &str) -> IResult<&str, Planet> {
     ))
 }
 
-fn parse_tribute(input: &str) -> IResult<&str, Tribute> {
+fn parse_tribute<'a>(input: &'a str) -> IResult<&'a str, Tribute<'a>> {
     let (input, (_, _, _, value, _)) =
         tuple((tab, tag("tribute"), space1, integer, line_ending))(input)?;
 
@@ -56,23 +56,17 @@ fn parse_tribute(input: &str) -> IResult<&str, Tribute> {
     ))
 }
 
-fn parse_fleet(input: &str) -> IResult<&str, Fleet> {
+fn parse_fleet<'a>(input: &'a str) -> IResult<&'a str, Fleet<'a>> {
     let (input, (_, _, _, _, kind, _, count)) =
         tuple((tab, tab, tag("fleet"), space1, string, space1, integer))(input)?;
 
-    Ok((
-        input,
-        Fleet {
-            kind: String::from(kind),
-            count,
-        },
-    ))
+    Ok((input, Fleet { kind, count }))
 }
 
-crate::parse_item_with_indent!(1, parse_description, description, string, &str);
-crate::parse_item_with_indent!(1, parse_spaceport, spaceport, string, &str);
-crate::parse_item_with_indent!(1, parse_shipyard, shipyard, string, &str);
-crate::parse_item_with_indent!(1, parse_outfitter, outfitter, string, &str);
+crate::parse_item_with_indent!(1, parse_description, description, string, &'a str);
+crate::parse_item_with_indent!(1, parse_spaceport, spaceport, string, &'a str);
+crate::parse_item_with_indent!(1, parse_shipyard, shipyard, string, &'a str);
+crate::parse_item_with_indent!(1, parse_outfitter, outfitter, string, &'a str);
 crate::parse_item_with_indent!(1, parse_bribe, bribe, float, f32);
 crate::parse_item_with_indent!(1, parse_security, security, float, f32);
 
@@ -102,26 +96,30 @@ mod test {
         assert!(parsed.is_ok());
         let planet = parsed.unwrap().1;
 
-        assert_eq!(planet.name, String::from("MyPlanet"));
+        assert_eq!(planet.name, "MyPlanet");
         assert_eq!(
-            planet.description,
+            planet
+                .description
+                .into_iter()
+                .map(String::from)
+                .collect::<Vec<_>>()
+                .join("\n"),
             String::from(
                 r#"This is a "special" planet
 	It can have a complete description"#
             )
         );
-        assert_eq!(planet.spaceport, String::from("And also a spaceport!"));
         assert_eq!(
-            planet.shipyard,
-            vec![String::from("Some Ships"), String::from("Also Those Ships")]
+            planet
+                .spaceport
+                .into_iter()
+                .map(String::from)
+                .collect::<Vec<_>>()
+                .join("\n"),
+            String::from("And also a spaceport!")
         );
-        assert_eq!(
-            planet.outfitter,
-            vec![
-                String::from("Basic Outifts"),
-                String::from("Advanced Outfits")
-            ]
-        );
+        assert_eq!(planet.shipyard, vec!["Some Ships", "Also Those Ships"]);
+        assert_eq!(planet.outfitter, vec!["Basic Outifts", "Advanced Outfits"]);
         assert_eq!(planet.bribe, 0.01);
         assert_eq!(planet.security, 0.5);
         assert_eq!(
@@ -130,7 +128,7 @@ mod test {
                 threshold: 3000,
                 value: 1000,
                 fleet: Fleet {
-                    kind: String::from("Impressive Fleet"),
+                    kind: "Impressive Fleet",
                     count: 18,
                 }
             }
