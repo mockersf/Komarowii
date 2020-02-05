@@ -62,6 +62,7 @@ pub fn comment_hole<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a s
     .map(|(remaining, _)| (remaining, ()))
 }
 
+/// helper to build function that will parse a field with an indententation
 #[macro_export]
 macro_rules! parse_item_with_indent {
     ($nb_ident:expr, $fn_name:ident, $tag:ident, $subparser:ident, $result:ty) => {

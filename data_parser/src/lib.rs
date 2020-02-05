@@ -1,3 +1,18 @@
+//! Parse Endless Sky data
+
+#![deny(
+    warnings,
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unsafe_code,
+    unstable_features,
+    unused_import_braces,
+    unused_qualifications,
+    missing_docs
+)]
+
 use nom::{
     branch::alt, character::complete::line_ending, combinator::all_consuming, error::ParseError,
     multi::many1, IResult,
@@ -11,12 +26,14 @@ mod helpers;
 mod planet;
 mod start;
 
+/// Parse Endless Sky data, returning a list of objects parsed or an empty list on error
 pub fn parse<'a>(input: &'a str) -> Vec<Object<'a>> {
     validate::<(&str, nom::error::ErrorKind)>(input)
         .map(|(_, data)| data)
         .unwrap_or_else(|_| vec![])
 }
 
+/// Parse Endless Sky data
 pub fn validate<'a, E: ParseError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Vec<Object<'a>>, E> {
