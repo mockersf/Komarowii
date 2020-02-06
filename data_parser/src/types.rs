@@ -70,6 +70,8 @@ pub struct Start<'a> {
 pub struct Planet<'a> {
     /// name of the planet
     pub name: &'a str,
+    /// attributes of the planet
+    pub attributes: Vec<&'a str>,
     /// description of the planet, each &str is a line
     pub description: Vec<&'a str>,
     /// description of the spaceport, each &str is a line

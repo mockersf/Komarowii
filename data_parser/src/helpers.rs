@@ -18,9 +18,7 @@ fn four_space_hole<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a st
     context("indent to ignore (space)", tag("    "))(input).map(|(remaining, _)| (remaining, ()))
 }
 
-pub fn indent_tab_or_4_space<'a, E: ParseError<&'a str>>(
-    input: &'a str,
-) -> IResult<&'a str, (), E> {
+pub fn indent<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, (), E> {
     context("indent to ignore", alt((tab_hole, four_space_hole)))(input)
 }
 
@@ -69,7 +67,7 @@ macro_rules! parse_item_with_indent {
             let (input, (_indent, _tag, _ws, extracted, _newline)) = context(
                 stringify!($tag),
                 tuple((
-                    count(indent_tab_or_4_space, $nb_ident),
+                    count(indent, $nb_ident),
                     tag(stringify!($tag)),
                     space1,
                     $subparser,

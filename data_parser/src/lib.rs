@@ -72,6 +72,7 @@ mod test {
 // my comment
 
 planet MyPlanet
+	attributes a1 a2 a3
 	description `This is a "special" planet`
 	description `	It can have a complete description`
 	spaceport `And also a spaceport!`

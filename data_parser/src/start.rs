@@ -1,7 +1,7 @@
 use nom::{
     branch::permutation,
     bytes::complete::tag,
-    character::complete::{line_ending, space1, tab},
+    character::complete::{line_ending, space1},
     error::{context, ParseError},
     multi::count,
     number::complete::float,
@@ -9,7 +9,7 @@ use nom::{
     IResult,
 };
 
-use crate::helpers::{date, indent_tab_or_4_space, integer, string};
+use crate::helpers::{date, indent, integer, string};
 use crate::types::{Account, Date, Mortgage, Start};
 
 pub fn parse_start<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Start<'a>, E> {
@@ -35,7 +35,7 @@ pub fn parse_start<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a st
 }
 
 fn parse_account<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Account, E> {
-    let (input, _) = tuple((tab, tag("account"), line_ending))(input)?;
+    let (input, _) = tuple((indent, tag("account"), line_ending))(input)?;
     let (input, (credits, score, mortgage)) =
         permutation((parse_credits, parse_score, parse_mortgage))(input)?;
 
@@ -51,8 +51,8 @@ fn parse_account<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str,
 
 fn parse_mortgage<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Mortgage, E> {
     let (input, _) = tuple((
-        tab,
-        tab,
+        indent,
+        indent,
         tag("mortgage"),
         space1,
         tag("Mortgage"),
