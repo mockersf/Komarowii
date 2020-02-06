@@ -72,6 +72,8 @@ pub struct Planet<'a> {
     pub name: &'a str,
     /// attributes of the planet
     pub attributes: Vec<&'a str>,
+    /// landscape to display for the planet
+    pub landscape: &'a str,
     /// description of the planet, each &str is a line
     pub description: Vec<&'a str>,
     /// description of the spaceport, each &str is a line

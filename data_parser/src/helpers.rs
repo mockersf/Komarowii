@@ -30,13 +30,17 @@ pub fn date<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Date
 
 pub fn string<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
     context(
-        "\"-delimited string",
+        "string",
         alt((
             preceded(char('"'), cut(terminated(take_until("\""), char('"')))),
             alphanumeric1,
             preceded(char('`'), cut(terminated(take_until("`"), char('`')))),
         )),
     )(input)
+}
+
+pub fn resource_path<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
+    context("resource path", take_until("\n"))(input)
 }
 
 pub fn integer<'a, T: std::str::FromStr, E: ParseError<&'a str>>(

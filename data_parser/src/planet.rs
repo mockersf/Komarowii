@@ -9,7 +9,7 @@ use nom::{
     IResult,
 };
 
-use crate::helpers::{indent, integer, string};
+use crate::helpers::{indent, integer, resource_path, string};
 use crate::types::{Fleet, Planet, Tribute};
 
 pub fn parse_planet<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Planet<'a>, E> {
@@ -19,11 +19,22 @@ pub fn parse_planet<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a s
     )(input)?;
     let (
         input,
-        (attributes, description, spaceport, shipyard, outfitter, bribe, security, tribute),
+        (
+            attributes,
+            landscape,
+            description,
+            spaceport,
+            shipyard,
+            outfitter,
+            bribe,
+            security,
+            tribute,
+        ),
     ) = context(
         "planet fields",
         permutation((
             parse_attributes,
+            parse_landscape,
             many1(parse_description),
             many1(parse_spaceport),
             many1(parse_shipyard),
@@ -39,6 +50,7 @@ pub fn parse_planet<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a s
         Planet {
             name,
             attributes,
+            landscape,
             description,
             spaceport,
             shipyard,
@@ -98,6 +110,7 @@ fn parse_fleet<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, F
     Ok((input, Fleet { kind, count }))
 }
 
+crate::parse_item_with_indent!(1, parse_landscape, landscape, resource_path, &'a str);
 crate::parse_item_with_indent!(1, parse_description, description, string, &'a str);
 crate::parse_item_with_indent!(1, parse_spaceport, spaceport, string, &'a str);
 crate::parse_item_with_indent!(1, parse_shipyard, shipyard, string, &'a str);
@@ -117,6 +130,7 @@ mod test {
     fn can_parse_planet() {
         let data = r#"planet MyPlanet
 	attributes a1 a2 a3
+	landscape flyover/sea1
 	description `This is a "special" planet`
 	description `	It can have a complete description`
 	spaceport `And also a spaceport!`
@@ -137,6 +151,7 @@ mod test {
 
         assert_eq!(planet.name, "MyPlanet");
         assert_eq!(planet.attributes, vec!["a1", "a2", "a3"]);
+        assert_eq!(planet.landscape, "flyover/sea1");
         assert_eq!(
             planet
                 .description
