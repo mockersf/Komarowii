@@ -37,5 +37,15 @@ fn main() {
 
     println!("{} blocks found, {} ok", total, ok);
 
-    println!("first failed: {:?}", first_failed);
+    println!(
+        "first failed: \n{:?}\n--> because: {}",
+        first_failed.map(|(b, _)| format!("{}\n", b)),
+        first_failed
+            .map(|(block, _)| {
+                let block = format!("{}\n", block);
+                let res = validate::<VerboseError<&str>>(&block);
+                format!("{:#?}", res)
+            })
+            .unwrap_or_else(|| String::from(""))
+    );
 }
