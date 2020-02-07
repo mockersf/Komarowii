@@ -51,7 +51,7 @@ pub struct Tribute<'a> {
 }
 
 /// Start point for the player
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Start<'a> {
     /// start date
     pub date: Date,
@@ -66,7 +66,7 @@ pub struct Start<'a> {
 }
 
 /// A planet
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Planet<'a> {
     /// name of the planet
     pub name: &'a str,
@@ -100,7 +100,7 @@ pub struct Position {
 }
 
 /// A galaxy
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Galaxy<'a> {
     /// it's position
     pub pos: Position,
@@ -108,6 +108,83 @@ pub struct Galaxy<'a> {
     pub name: &'a str,
     /// it's sprite
     pub sprite: Option<&'a str>,
+}
+
+/// An asteroid
+#[derive(Debug, PartialEq)]
+pub struct Asteroids<'a> {
+    /// it's name
+    pub name: &'a str,
+    /// (?)
+    pub first_value: u32,
+    /// (?)
+    pub second_value: f32,
+}
+
+/// A minable
+#[derive(Debug, PartialEq)]
+pub struct Minables<'a> {
+    /// it's name
+    pub name: &'a str,
+    /// (?)
+    pub first_value: u32,
+    /// (?)
+    pub second_value: f32,
+}
+
+/// A trade good with a price
+#[derive(Debug, PartialEq)]
+pub struct Trade<'a> {
+    /// it's name
+    pub name: &'a str,
+    /// price
+    pub price: u32,
+}
+
+/// An object in a system
+#[derive(Debug, PartialEq)]
+pub struct SystemObject<'a> {
+    /// it's name
+    pub name: Option<&'a str>,
+    /// it's sprite
+    pub sprite: Option<&'a str>,
+    /// distance
+    pub distance: Option<f32>,
+    /// period
+    pub period: f32,
+    /// offset
+    pub offset: Option<f32>,
+    /// related objects
+    pub objects: Vec<Box<SystemObject<'a>>>,
+}
+
+/// A system
+#[derive(Debug, PartialEq)]
+pub struct System<'a> {
+    /// it's name
+    pub name: &'a str,
+    /// it's position
+    pub pos: Position,
+    /// it's government
+    pub government: &'a str,
+    /// habitable (?)
+    pub habitable: f32,
+    /// belt (?)
+    pub belt: Option<u32>,
+    /// haze type
+    pub haze: Option<&'a str>,
+    /// links to other systems
+    pub links: Vec<&'a str>,
+    /// asteroids present in the system
+    pub asteroids: Vec<Asteroids<'a>>,
+    /// minables present in the system
+    pub minables: Vec<Minables<'a>>,
+    /// trade goods that are sold here
+    pub trades: Vec<Trade<'a>>,
+    /// fleets present in the system
+    pub fleets: Vec<Fleet<'a>>,
+    /// objects present in the system
+    pub objects: Vec<SystemObject<'a>>,
 }
 
 /// list of top level objects that can be parsed
@@ -119,4 +196,6 @@ pub enum Object<'a> {
     Planet(Planet<'a>),
     /// a galaxy
     Galaxy(Galaxy<'a>),
+    /// a system
+    System(System<'a>),
 }

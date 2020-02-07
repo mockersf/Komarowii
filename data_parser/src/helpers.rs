@@ -2,11 +2,11 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     bytes::complete::take_until,
-    character::complete::{alphanumeric1, char, digit1, line_ending, space1, tab},
+    character::complete::{char, digit1, line_ending, space1, tab},
     combinator::cut,
-    error::{context, ParseError},
+    error::{context, ErrorKind, ParseError},
     sequence::{preceded, terminated, tuple},
-    IResult,
+    AsChar, IResult, InputTakeAtPosition,
 };
 
 use crate::types::Date;
@@ -33,10 +33,24 @@ pub fn string<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'
         "string",
         alt((
             preceded(char('"'), cut(terminated(take_until("\""), char('"')))),
-            alphanumeric1,
+            alphanumeric_or_other_ok1,
             preceded(char('`'), cut(terminated(take_until("`"), char('`')))),
         )),
     )(input)
+}
+
+pub fn alphanumeric_or_other_ok1<T, E: ParseError<T>>(input: T) -> IResult<T, T, E>
+where
+    T: InputTakeAtPosition,
+    <T as InputTakeAtPosition>::Item: AsChar,
+{
+    input.split_at_position1_complete(
+        |item| {
+            let ch = item.as_char();
+            !(ch.is_ascii_alphabetic() || ch.is_ascii_digit() || ch == '\'' || ch == '-')
+        },
+        ErrorKind::AlphaNumeric,
+    )
 }
 
 pub fn resource_path<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {

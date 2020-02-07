@@ -26,6 +26,7 @@ mod helpers;
 mod galaxy;
 mod planet;
 mod start;
+mod system;
 
 /// Parse Endless Sky data, returning a list of objects parsed or an empty list on error
 pub fn parse<'a>(input: &'a str) -> Vec<Object<'a>> {
@@ -47,6 +48,9 @@ pub fn validate<'a, E: ParseError<&'a str>>(
         },
         |input| {
             galaxy::parse_galaxy(input).map(|(input, parsed)| (input, Some(Object::Galaxy(parsed))))
+        },
+        |input| {
+            system::parse_system(input).map(|(input, parsed)| (input, Some(Object::System(parsed))))
         },
         |input| line_ending(input).map(|(input, _)| (input, None)),
         |input| helpers::comment_hole(input).map(|(input, _)| (input, None)),
