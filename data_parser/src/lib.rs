@@ -23,6 +23,7 @@ pub use types::*;
 
 mod helpers;
 
+mod galaxy;
 mod planet;
 mod start;
 
@@ -43,6 +44,9 @@ pub fn validate<'a, E: ParseError<&'a str>>(
         },
         |input| {
             planet::parse_planet(input).map(|(input, parsed)| (input, Some(Object::Planet(parsed))))
+        },
+        |input| {
+            galaxy::parse_galaxy(input).map(|(input, parsed)| (input, Some(Object::Galaxy(parsed))))
         },
         |input| line_ending(input).map(|(input, _)| (input, None)),
         |input| helpers::comment_hole(input).map(|(input, _)| (input, None)),

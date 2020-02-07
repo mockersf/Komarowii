@@ -90,6 +90,26 @@ pub struct Planet<'a> {
     pub tribute: Tribute<'a>,
 }
 
+/// A position
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Position {
+    /// x pos
+    pub x: f64,
+    /// y pos
+    pub y: f64,
+}
+
+/// A galaxy
+#[derive(Debug)]
+pub struct Galaxy<'a> {
+    /// it's position
+    pub pos: Position,
+    /// it's name
+    pub name: &'a str,
+    /// it's sprite
+    pub sprite: Option<&'a str>,
+}
+
 /// list of top level objects that can be parsed
 #[derive(Debug)]
 pub enum Object<'a> {
@@ -97,4 +117,6 @@ pub enum Object<'a> {
     Start(Start<'a>),
     /// a planet
     Planet(Planet<'a>),
+    /// a galaxy
+    Galaxy(Galaxy<'a>),
 }
