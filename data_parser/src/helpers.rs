@@ -97,3 +97,61 @@ macro_rules! parse_item_with_indent {
         }
     };
 }
+
+/// will parse an item present once, peeking first if the tag is present, and continuing the loop when found
+#[macro_export]
+macro_rules! parse_item_in_loop {
+    ($nb_ident:expr, $tag:ident, $subparser:expr, $input:ident, $builder:ident) => {
+        crate::parse_item_in_loop!(
+            $nb_ident,
+            $tag,
+            stringify!($tag),
+            $subparser,
+            $input,
+            $builder
+        )
+    };
+    ($nb_ident:expr, $field:ident, $tag:expr, $subparser:expr, $input:ident, $builder:ident) => {
+        let peeked: IResult<_, _, (&str, nom::error::ErrorKind)> =
+            peek(tuple((count(indent, 1), tag($tag))))($input);
+        if peeked.is_ok() {
+            let (remaining, (_indent, _tag, _ws, extracted, _newline)) = context(
+                $tag,
+                tuple((
+                    count(indent, 1),
+                    tag($tag),
+                    space1,
+                    $subparser,
+                    opt(line_ending),
+                )),
+            )($input)?;
+            $input = remaining;
+            $builder.$field(extracted);
+            continue;
+        }
+    };
+}
+
+/// will parse an item present at least once, peeking first if the tag is present, and continuing the loop when found
+#[macro_export]
+macro_rules! parse_items_in_loop {
+    ($nb_ident:expr, $tag:ident, $subparser:expr, $out:ty, $input:ident, $builder:ident) => {
+        let peeked: IResult<_, _, (&str, nom::error::ErrorKind)> =
+            peek(tuple((count(indent, 1), tag(stringify!($tag)))))($input);
+        if peeked.is_ok() {
+            let (remaining, extracted) = context(
+                stringify!($tag),
+                many1(tuple((
+                    count(indent, 1),
+                    tag(stringify!($tag)),
+                    space1,
+                    $subparser,
+                    line_ending,
+                ))),
+            )($input)?;
+            $input = remaining;
+            $builder.$tag(extracted.iter().map(|v| v.3).collect::<Vec<$out>>());
+            continue;
+        }
+    };
+}

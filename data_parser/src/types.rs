@@ -1,5 +1,8 @@
+use derive_builder::Builder;
+
 /// Mortgage owned by a player
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Builder)]
+#[builder(setter(into))]
 pub struct Mortgage {
     /// amount of mortgage
     pub principal: u64,
@@ -10,7 +13,8 @@ pub struct Mortgage {
 }
 
 /// Account of a player
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Builder)]
+#[builder(setter(into))]
 pub struct Account {
     /// how much he currently has
     pub credits: u64,
@@ -19,8 +23,10 @@ pub struct Account {
     /// his current mortgage
     pub mortgage: Mortgage,
 }
+
 /// A date
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Builder)]
+#[builder(setter(into))]
 pub struct Date {
     /// the year
     pub year: u16,
@@ -31,7 +37,8 @@ pub struct Date {
 }
 
 /// A fleet
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct Fleet<'a> {
     /// kind of the fleet
     pub kind: &'a str,
@@ -40,7 +47,8 @@ pub struct Fleet<'a> {
 }
 
 /// Tribute given by a planet
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct Tribute<'a> {
     /// amount given for tribute
     pub value: u32,
@@ -51,7 +59,8 @@ pub struct Tribute<'a> {
 }
 
 /// Start point for the player
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct Start<'a> {
     /// start date
     pub date: Date,
@@ -66,14 +75,19 @@ pub struct Start<'a> {
 }
 
 /// A planet
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder, Default)]
+#[builder(setter(into), default)]
 pub struct Planet<'a> {
     /// name of the planet
     pub name: &'a str,
     /// attributes of the planet
     pub attributes: Vec<&'a str>,
     /// landscape to display for the planet
-    pub landscape: &'a str,
+    pub landscape: Option<&'a str>,
+    /// government of the planet, if different from the parent system
+    pub government: Option<&'a str>,
+    /// music to play on landing
+    pub music: Option<&'a str>,
     /// description of the planet, each &str is a line
     pub description: Vec<&'a str>,
     /// description of the spaceport, each &str is a line
@@ -83,15 +97,18 @@ pub struct Planet<'a> {
     /// outfitter, each &str is a set of outfits sold
     pub outfitter: Vec<&'a str>,
     /// factor for bribe (?)
-    pub bribe: f32,
+    pub bribe: Option<f32>,
     /// security of the planet (?)
-    pub security: f32,
+    pub security: Option<f32>,
     /// tribute for this planet
-    pub tribute: Tribute<'a>,
+    pub tribute: Option<Tribute<'a>>,
+    /// required reputation with planet faction to land
+    pub required_reputation: Option<f32>,
 }
 
 /// A position
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Builder)]
+#[builder(setter(into))]
 pub struct Position {
     /// x pos
     pub x: f64,
@@ -100,7 +117,8 @@ pub struct Position {
 }
 
 /// A galaxy
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct Galaxy<'a> {
     /// it's position
     pub pos: Position,
@@ -111,7 +129,8 @@ pub struct Galaxy<'a> {
 }
 
 /// An asteroid
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct Asteroids<'a> {
     /// it's name
     pub name: &'a str,
@@ -122,7 +141,8 @@ pub struct Asteroids<'a> {
 }
 
 /// A minable
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct Minables<'a> {
     /// it's name
     pub name: &'a str,
@@ -133,7 +153,8 @@ pub struct Minables<'a> {
 }
 
 /// A trade good with a price
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct Trade<'a> {
     /// it's name
     pub name: &'a str,
@@ -142,7 +163,8 @@ pub struct Trade<'a> {
 }
 
 /// An object in a system
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct SystemObject<'a> {
     /// it's name
     pub name: Option<&'a str>,
@@ -155,11 +177,12 @@ pub struct SystemObject<'a> {
     /// offset
     pub offset: Option<f32>,
     /// related objects
-    pub objects: Vec<Box<SystemObject<'a>>>,
+    pub objects: Vec<SystemObject<'a>>,
 }
 
 /// A system
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(setter(into))]
 pub struct System<'a> {
     /// it's name
     pub name: &'a str,

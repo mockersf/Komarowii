@@ -186,7 +186,7 @@ fn parse_object_at_level<'a, E: ParseError<&'a str>>(
             distance: distance.map(|distance| distance.1),
             offset: offset.map(|offset| offset.1),
             period: period.1,
-            objects: objects.into_iter().map(|object| Box::new(object)).collect(),
+            objects,
         },
     ))
 }
@@ -299,14 +299,14 @@ mod test {
                     distance: Some(1811.79),
                     period: 1129.48,
                     offset: None,
-                    objects: vec![Box::new(SystemObject {
+                    objects: vec![SystemObject {
                         name: Some("Moon"),
                         sprite: Some("moon/nice-moon"),
                         distance: Some(229.0),
                         period: 12.994,
                         offset: None,
                         objects: vec![]
-                    })]
+                    }]
                 },
                 SystemObject {
                     name: None,

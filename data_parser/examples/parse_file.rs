@@ -1,8 +1,6 @@
 use std::env;
 use std::fs;
 
-use nom::error::VerboseError;
-
 use data_parser::validate;
 
 fn main() {
@@ -14,7 +12,7 @@ fn main() {
 
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
 
-    let parsed = validate::<VerboseError<&str>>(&contents);
+    let parsed = validate(&contents);
     if let Ok(parsed) = parsed {
         println!("{:#?}", parsed.1);
         std::process::exit(0);

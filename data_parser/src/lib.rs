@@ -14,14 +14,15 @@
 )]
 
 use nom::{
-    branch::alt, character::complete::line_ending, combinator::all_consuming, error::ParseError,
-    multi::many1, IResult,
+    branch::alt, character::complete::line_ending, combinator::all_consuming, multi::many1, IResult,
 };
 
 mod types;
 pub use types::*;
 
+mod errors;
 mod helpers;
+use errors::DataError;
 
 mod galaxy;
 mod planet;
@@ -30,15 +31,13 @@ mod system;
 
 /// Parse Endless Sky data, returning a list of objects parsed or an empty list on error
 pub fn parse<'a>(input: &'a str) -> Vec<Object<'a>> {
-    validate::<(&str, nom::error::ErrorKind)>(input)
+    validate(input)
         .map(|(_, data)| data)
         .unwrap_or_else(|_| vec![])
 }
 
 /// Parse Endless Sky data
-pub fn validate<'a, E: ParseError<&'a str>>(
-    input: &'a str,
-) -> IResult<&'a str, Vec<Object<'a>>, E> {
+pub fn validate<'a>(input: &'a str) -> IResult<&'a str, Vec<Object<'a>>, DataError<&'a str>> {
     all_consuming(many1(alt((
         |input| {
             start::parse_start(input).map(|(input, parsed)| (input, Some(Object::Start(parsed))))
@@ -67,11 +66,9 @@ pub fn validate<'a, E: ParseError<&'a str>>(
 mod test {
     use super::validate;
 
-    use nom::error::VerboseError;
-
     #[test]
     fn will_fail_for_empty_input() {
-        assert!(validate::<VerboseError<&str>>("").is_err())
+        assert!(validate("").is_err())
     }
 
     #[test]
@@ -108,7 +105,7 @@ start
 			interest 0.005
             term 365
 "#;
-        let parsed = dbg!(validate::<VerboseError<&str>>(data));
+        let parsed = dbg!(validate(data));
         assert!(parsed.is_ok());
     }
 }
