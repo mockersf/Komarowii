@@ -221,6 +221,128 @@ pub struct System<'a> {
     pub objects: Vec<SystemObject<'a>>,
 }
 
+/// weapon of a ship (?)
+#[derive(Debug, PartialEq, Clone, Copy, Builder)]
+pub struct ShipWeapon {
+    /// it's blast radius
+    pub blast_radius: u32,
+    /// it's shield damage
+    pub shield_damage: u32,
+    /// it's hull damage
+    pub hull_damage: u32,
+    /// it's hit force
+    pub hit_force: u32,
+}
+
+/// Attributes of a ship
+#[derive(Debug, PartialEq, Clone, Builder)]
+pub struct ShipAttributes<'a> {
+    /// licences needed to pilot this ship
+    #[builder(default)]
+    pub licenses: Vec<&'a str>,
+    /// it's category
+    pub category: &'a str,
+    /// it's cost
+    pub cost: u32,
+    /// it's shield
+    #[builder(default)]
+    pub shields: u32,
+    /// it's hull strength
+    pub hull: u32,
+    /// is it an automaton
+    #[builder(default)]
+    pub automaton: bool,
+    /// it's required crew count
+    #[builder(default)]
+    pub required_crew: u32,
+    /// it's bunk count
+    #[builder(default)]
+    pub bunks: u32,
+    /// it's mass
+    pub mass: u32,
+    /// it's drag
+    pub drag: f32,
+    /// it's heat dissipation
+    pub heat_dissipation: f32,
+    /// it's fuel capacity
+    #[builder(default)]
+    pub fuel_capacity: u32,
+    /// it's cargo space
+    #[builder(default)]
+    pub cargo_space: u32,
+    /// it's outfit space
+    pub outfit_space: u32,
+    /// it's weapon capacity
+    #[builder(default)]
+    pub weapon_capacity: u32,
+    /// it's engine capacity
+    pub engine_capacity: u32,
+    /// it's weapon (?)
+    pub weapon: ShipWeapon,
+}
+
+/// a sprite
+#[derive(Debug, PartialEq, Clone)]
+pub enum Sprite<'a> {
+    /// Complex sprite with multiple frames
+    Sprite {
+        /// name of the sprite
+        name: &'a str,
+        /// (?)
+        frame_time: u32,
+        /// (?)
+        delay: u32,
+        /// (?)
+        random_start_frame: bool,
+    },
+    /// Simple sprite
+    Simple(&'a str),
+}
+
+/// A ship
+#[derive(Debug, PartialEq, Clone, Builder)]
+pub struct Ship<'a> {
+    /// name of the ship
+    pub name: &'a str,
+    /// subclass of the ship
+    pub subclass: Option<&'a str>,
+    /// plural form of the name
+    #[builder(setter(into), default)]
+    pub plural: Option<&'a str>,
+    /// sprite of the ship
+    pub sprite: Sprite<'a>,
+    /// thumbnail of the ship
+    pub thumbnail: &'a str,
+    /// attributes of the ship
+    pub attributes: ShipAttributes<'a>,
+    /// outfits of the ship
+    pub outfits: Vec<(&'a str, u32)>,
+    /// engine locations and (?)
+    pub engine: Vec<(f32, f32, Option<f32>)>,
+    /// gun mount locations and what they hold
+    #[builder(default)]
+    pub gun: Vec<(f32, f32, Option<&'a str>)>,
+    /// turret mount locations and what they hold
+    #[builder(default)]
+    pub turret: Vec<(f32, f32, Option<&'a str>)>,
+    /// fighter mount locations and wherethey are
+    #[builder(default)]
+    pub fighter: Vec<(f32, f32, Option<&'a str>)>,
+    /// drone mount locations and where they are
+    #[builder(default)]
+    pub drone: Vec<(f32, f32, Option<&'a str>)>,
+    /// leaks (?)
+    #[builder(default)]
+    pub leak: Vec<(&'a str, u32, u32)>,
+    /// explosion on death and tiling (?)
+    pub explode: Vec<(&'a str, u32)>,
+    /// final explosion
+    #[builder(setter(into), default)]
+    pub final_explode: Option<&'a str>,
+    /// description
+    pub description: Vec<&'a str>,
+}
+
 /// list of top level objects that can be parsed
 #[derive(Debug)]
 pub enum Object<'a> {
@@ -232,4 +354,6 @@ pub enum Object<'a> {
     Galaxy(Galaxy<'a>),
     /// a system
     System(System<'a>),
+    /// a ship
+    Ship(Ship<'a>),
 }

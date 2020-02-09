@@ -54,7 +54,13 @@ where
 }
 
 pub fn resource_path<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
-    context("resource path", take_until("\n"))(input)
+    context(
+        "resource path",
+        alt((
+            preceded(char('"'), cut(terminated(take_until("\""), char('"')))),
+            take_until("\n"),
+        )),
+    )(input)
 }
 
 pub fn integer<'a, T: std::str::FromStr, E: ParseError<&'a str>>(
@@ -125,7 +131,7 @@ macro_rules! parse_item_in_loop {
                         nom::sequence::tuple((
                             nom::multi::count(indent, $nb_indent),
                             nom::bytes::complete::tag($tag),
-                            space1,
+                            nom::combinator::opt(space1),
                         )),
                         $subparser,
                     ),
@@ -156,11 +162,14 @@ macro_rules! parse_items_in_loop {
                         nom::sequence::tuple((
                             nom::multi::count(indent, $nb_indent),
                             nom::bytes::complete::tag(stringify!($field)),
-                            space1,
+                            nom::combinator::opt(space1),
                         )),
                         $subparser,
                     ),
-                    nom::multi::many0(line_ending),
+                    nom::sequence::tuple((
+                        nom::multi::many0(indent),
+                        nom::multi::many0(line_ending),
+                    )),
                 )),
             )($input)?;
             $input = remaining;

@@ -10,9 +10,18 @@ fn main() {
 
     println!("reading file {}", filename);
 
-    let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
-    let blocks = contents.split("\n\n").collect::<Vec<_>>();
-    let total = blocks.iter().filter(|block| **block != "").count();
+    let contents =
+        fs::read_to_string(filename.clone()).expect("Something went wrong reading the file");
+    let mut blocks = contents.split("\n\n\n").collect::<Vec<_>>();
+    let mut total = blocks.iter().filter(|block| **block != "").count();
+    if total < 2 {
+        blocks = contents.split("\n\n").collect::<Vec<_>>();
+        total = blocks.iter().filter(|block| **block != "").count();
+    }
+
+    let total_contents =
+        &fs::read_to_string(filename).expect("Something went wrong reading the file");
+    let total_read = data_parser::parse(&total_contents);
 
     let ok = blocks
         .iter()
@@ -34,7 +43,12 @@ fn main() {
         .filter(|(_, is_err)| *is_err)
         .next();
 
-    println!("{} blocks found, {} ok", total, ok);
+    println!(
+        "{} blocks found, {} ok ({} on total read)",
+        total,
+        ok,
+        total_read.len()
+    );
     if total == ok {
         std::process::exit(0);
     }

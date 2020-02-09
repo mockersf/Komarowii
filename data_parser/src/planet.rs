@@ -57,6 +57,7 @@ pub fn parse_planet<'a>(input: &'a str) -> IResult<&'a str, Planet<'a>, DataErro
         .map(|planet| (input, planet))
         .map_err(|err| {
             nom::Err::Failure(DataError::DataBuilderError {
+                input: input,
                 error: err,
                 data_type: String::from("planet"),
             })

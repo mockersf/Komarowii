@@ -2,8 +2,15 @@ use nom::error::{ErrorKind, ParseError};
 
 #[derive(Debug)]
 pub enum DataError<I> {
-    NomError { input: I, kind: ErrorKind },
-    DataBuilderError { error: String, data_type: String },
+    NomError {
+        input: I,
+        kind: ErrorKind,
+    },
+    DataBuilderError {
+        input: I,
+        error: String,
+        data_type: String,
+    },
     Errors(Vec<DataError<I>>),
 }
 
