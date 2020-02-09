@@ -75,7 +75,7 @@ pub struct Start<'a> {
 }
 
 /// A planet
-#[derive(Debug, PartialEq, Clone, Builder, Default)]
+#[derive(Debug, PartialEq, Clone, Builder)]
 #[builder(setter(into))]
 pub struct Planet<'a> {
     /// name of the planet
