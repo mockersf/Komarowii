@@ -76,33 +76,44 @@ pub struct Start<'a> {
 
 /// A planet
 #[derive(Debug, PartialEq, Clone, Builder, Default)]
-#[builder(setter(into), default)]
+#[builder(setter(into))]
 pub struct Planet<'a> {
     /// name of the planet
     pub name: &'a str,
     /// attributes of the planet
+    #[builder(default)]
     pub attributes: Vec<&'a str>,
     /// landscape to display for the planet
+    #[builder(default)]
     pub landscape: Option<&'a str>,
     /// government of the planet, if different from the parent system
+    #[builder(default)]
     pub government: Option<&'a str>,
     /// music to play on landing
+    #[builder(default)]
     pub music: Option<&'a str>,
     /// description of the planet, each &str is a line
     pub description: Vec<&'a str>,
     /// description of the spaceport, each &str is a line
+    #[builder(default)]
     pub spaceport: Vec<&'a str>,
     /// shipyard, each &str is a set of ships sold
+    #[builder(default)]
     pub shipyard: Vec<&'a str>,
     /// outfitter, each &str is a set of outfits sold
+    #[builder(default)]
     pub outfitter: Vec<&'a str>,
     /// factor for bribe (?)
+    #[builder(default)]
     pub bribe: Option<f32>,
     /// security of the planet (?)
+    #[builder(default)]
     pub security: Option<f32>,
     /// tribute for this planet
+    #[builder(default)]
     pub tribute: Option<Tribute<'a>>,
     /// required reputation with planet faction to land
+    #[builder(default)]
     pub required_reputation: Option<f32>,
 }
 

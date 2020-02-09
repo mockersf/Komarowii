@@ -59,7 +59,7 @@ pub fn parse_planet<'a>(input: &'a str) -> IResult<&'a str, Planet<'a>, DataErro
         .map_err(|err| {
             nom::Err::Failure(DataError::DataBuilderError {
                 error: err,
-                data_type: String::from("planer"),
+                data_type: String::from("planet"),
             })
         })
 }
