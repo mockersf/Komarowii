@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 
-use data_parser::validate;
+use es_data_parser::validate;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

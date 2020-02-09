@@ -1,5 +1,5 @@
 [package]
-name = "data_parser"
+name = "es_data_parser"
 version = "0.1.0"
 authors = ["François Mockers <mockersf@gmail.com>"]
 edition = "2018"

@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 
-use data_parser::validate;
+use es_data_parser::validate;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -21,7 +21,7 @@ fn main() {
 
     let total_contents =
         &fs::read_to_string(filename).expect("Something went wrong reading the file");
-    let total_read = data_parser::parse(&total_contents);
+    let total_read = es_data_parser::parse(&total_contents);
 
     let ok = blocks
         .iter()
