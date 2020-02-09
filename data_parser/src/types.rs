@@ -344,6 +344,7 @@ pub struct Ship<'a> {
 }
 
 /// list of top level objects that can be parsed
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug)]
 pub enum Object<'a> {
     /// player start

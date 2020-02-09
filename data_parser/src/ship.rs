@@ -118,10 +118,10 @@ pub fn parse_ship<'a>(input: &'a str) -> IResult<&'a str, Ship<'a>, DataError<&'
         break;
     }
 
-    builder.build().map(|ship| (input, ship)).map_err(|err| {
+    builder.build().map(|ship| (input, ship)).map_err(|error| {
         nom::Err::Failure(DataError::DataBuilderError {
-            input: input,
-            error: err,
+            input,
+            error,
             data_type: String::from("ship"),
         })
     })
@@ -249,10 +249,10 @@ pub fn parse_ship_attributes<'a>(
     builder
         .build()
         .map(|ship_attributes| (input, ship_attributes))
-        .map_err(|err| {
+        .map_err(|error| {
             nom::Err::Failure(DataError::DataBuilderError {
-                input: input,
-                error: err,
+                input,
+                error,
                 data_type: String::from("ship attributes"),
             })
         })
@@ -282,10 +282,10 @@ pub fn parse_ship_weapon<'a>(input: &'a str) -> IResult<&'a str, ShipWeapon, Dat
     builder
         .build()
         .map(|ship_weapon| (input, ship_weapon))
-        .map_err(|err| {
+        .map_err(|error| {
             nom::Err::Failure(DataError::DataBuilderError {
-                input: input,
-                error: err,
+                input,
+                error,
                 data_type: String::from("ship attributes - weapon"),
             })
         })
