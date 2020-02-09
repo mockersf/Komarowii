@@ -2,9 +2,8 @@ use nom::{
     branch::permutation,
     bytes::complete::tag,
     character::complete::{line_ending, space1},
-    combinator::{opt, peek},
     error::{context, ParseError},
-    multi::{count, many1, separated_list},
+    multi::{count, separated_list},
     number::complete::float,
     sequence::tuple,
     IResult,
@@ -33,11 +32,11 @@ pub fn parse_planet<'a>(input: &'a str) -> IResult<&'a str, Planet<'a>, DataErro
         );
         crate::parse_item_in_loop!(1, landscape, resource_path, input, builder);
         crate::parse_item_in_loop!(1, government, string, input, builder);
-        crate::parse_items_in_loop!(1, description, string, &'a str, input, builder);
+        crate::parse_items_in_loop!(1, description, string, input, builder);
         crate::parse_item_in_loop!(1, music, resource_path, input, builder);
-        crate::parse_items_in_loop!(1, spaceport, string, &'a str, input, builder);
-        crate::parse_items_in_loop!(1, shipyard, string, &'a str, input, builder);
-        crate::parse_items_in_loop!(1, outfitter, string, &'a str, input, builder);
+        crate::parse_items_in_loop!(1, spaceport, string, input, builder);
+        crate::parse_items_in_loop!(1, shipyard, string, input, builder);
+        crate::parse_items_in_loop!(1, outfitter, string, input, builder);
         crate::parse_item_in_loop!(1, bribe, float, input, builder);
         crate::parse_item_in_loop!(1, security, float, input, builder);
         crate::parse_item_in_loop!(
