@@ -44,7 +44,7 @@ dependencies = [
 ]
 script = [
     '''
-    cp endless-sky-${ENDLESS_SKY_VERSION}/data/* data/
+    cp -r endless-sky-${ENDLESS_SKY_VERSION}/data/ data
     cp -r endless-sky-${ENDLESS_SKY_VERSION}/images/ images
     '''
 ]
@@ -53,7 +53,6 @@ script = [
 description = "Download target version of Endless Sky"
 category = "Publish"
 workspace = false
-condition = { files_exist = ["${CARGO_MAKE_WORKING_DIRECTORY}/endless-sky-${ENDLESS_SKY_VERSION}.zip"] }
 script = [
     '''
     rm -rf endless-sky-${ENDLESS_SKY_VERSION}.zip endless-sky-${ENDLESS_SKY_VERSION}
@@ -97,12 +96,12 @@ script = [
   '''
 ]
 
-[task.prepare-release]
+[tasks.prepare-release]
 description = "Prepare release by copying data and setting up BOM"
 category = "Publish"
 workspace = false
 dependencies = [
     "prepare-es",
     "bom",
-    "cleeanup-es"
+    "cleanup-es"
 ]
