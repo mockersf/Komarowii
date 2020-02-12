@@ -28,22 +28,51 @@ impl Game {
 
     #[export]
     fn _ready(&mut self, mut owner: OwnerNode) {
-        if let Some(new_stellar_object) = self
-            .star_scene
-            .as_ref()
-            .and_then(|star_scene| (&star_scene).instance(0))
-            .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
-        {
-            unsafe {
-                owner.add_child(Some(new_stellar_object.to_node()), false);
-            }
-        }
+        let mut game_data_file = gdnative::File::new();
+        game_data_file
+            .open("res://data/simple_game.txt".into(), 1)
+            .unwrap();
+        let game_data = game_data::start_from_es_data(&game_data_file.get_as_text().to_string());
+        let mut object_parent = unsafe {
+            owner
+                .get_node("objects".into())
+                .expect("objects is present")
+        };
+        game_data.systems[0].objects.iter().for_each(|object| {
+            if let Some(mut new_stellar_object) = self
+                .star_scene
+                .as_ref()
+                .and_then(|star_scene| (&star_scene).instance(0))
+                .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
+            {
+                unsafe {
+                    if let Some(ref sprite) = object.sprite {
+                        let texture = ResourceLoader::godot_singleton()
+                            .load(
+                                format!("res://images/{}.png", sprite).into(),
+                                "Texture".into(),
+                                false,
+                            )
+                            .and_then(|s| s.cast::<Texture>());
+                        new_stellar_object
+                            .get_node("Sprite".into())
+                            .unwrap()
+                            .cast::<Sprite>()
+                            .unwrap()
+                            .set_texture(texture);
+                    }
+                    new_stellar_object.translate(euclid::vec2(0.0, object.distance));
+                    object_parent.add_child(Some(new_stellar_object.to_node()), false);
+                }
+            };
+        });
         if let Some(new_player) = self
             .player_scene
             .as_ref()
             .and_then(|player_scene| (&player_scene).instance(0))
             .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
         {
+            godot_print!("adding player");
             unsafe {
                 let mut node = new_player.to_node();
                 node.set_name("player".into());

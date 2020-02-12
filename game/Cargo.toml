@@ -16,3 +16,4 @@ euclid = "0.20"
 rand = "0.7.3"
 
 helpers = { path = "../helpers" }
+game_data = { path = "../game_data" }
