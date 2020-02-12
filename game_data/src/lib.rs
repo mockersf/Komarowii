@@ -84,17 +84,15 @@ pub fn start_from_es_data(es_game_data_source: &str) -> Game {
                 .collect(),
         })
         .collect::<Vec<_>>();
-    let game_data = Game {
+    Game {
         player: Player {
             ship: ships
                 .iter()
-                .filter(|ship| ship.name == "Shuttle")
-                .next()
+                .find(|ship| ship.name == "Shuttle")
                 .unwrap()
                 .clone(),
         },
         systems,
         ships,
-    };
-    game_data
+    }
 }
