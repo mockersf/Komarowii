@@ -29,11 +29,11 @@ pub struct Account {
 #[builder(setter(into))]
 pub struct Date {
     /// the year
-    pub year: u16,
+    pub year: i32,
     /// the month
-    pub month: u8,
+    pub month: u32,
     /// the day
-    pub day: u8,
+    pub day: u32,
 }
 
 /// A fleet

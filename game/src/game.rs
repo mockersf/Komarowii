@@ -50,6 +50,7 @@ impl Game {
         }
         data_dir.list_dir_end();
 
+        let days_since_beginning = game_data.get_nb_days_elapsed_since_beginning() as f32;
         let mut object_parent = unsafe {
             owner
                 .get_node("objects".into())
@@ -84,7 +85,20 @@ impl Game {
                                 .unwrap()
                                 .set_texture(texture);
                         }
-                        new_stellar_object.translate(euclid::vec2(0.0, object.distance));
+                        godot_print!(
+                            "rotation status: period {}, days elapsed {}, angle {}",
+                            object.period,
+                            days_since_beginning,
+                            days_since_beginning / object.period * 2.0 * std::f32::consts::PI
+                        );
+                        let rota = euclid::Rotation2D::new(euclid::Angle::radians(
+                            days_since_beginning / object.period * 2.0 * std::f32::consts::PI,
+                        ));
+                        let position =
+                            euclid::vec2::<f32, euclid::UnknownUnit>(0.0, object.distance);
+                        let position = rota.transform_vector(position);
+                        godot_print!("---> position {:?}", position);
+                        new_stellar_object.translate(position);
                         object_parent.add_child(Some(new_stellar_object.to_node()), false);
                     }
                 };

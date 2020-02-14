@@ -28,6 +28,7 @@ pub struct System {
 #[derive(Debug)]
 pub struct Game {
     pub start_system_name: Option<String>,
+    pub current_date: Option<chrono::NaiveDate>,
     pub player: Player,
     pub systems: Vec<Arc<System>>,
     pub ships: Vec<Arc<Ship>>,
@@ -40,10 +41,19 @@ impl Game {
                 ship: None,
                 current_system: None,
             },
+            current_date: None,
             systems: vec![],
             ships: vec![],
             start_system_name: None,
         }
+    }
+
+    pub fn get_nb_days_elapsed_since_beginning(&self) -> i64 {
+        self.get_nb_days_elapsed_since(chrono::NaiveDate::from_ymd(2020, 1, 1))
+    }
+
+    pub fn get_nb_days_elapsed_since(&self, start_date: chrono::NaiveDate) -> i64 {
+        (self.current_date.unwrap() - start_date).num_days()
     }
 
     pub fn add_data_file(&mut self, es_game_data_source: &str) {
@@ -106,6 +116,8 @@ impl Game {
             .next()
         {
             self.start_system_name = Some(String::from(start.system));
+            self.current_date =
+                chrono::NaiveDate::from_ymd_opt(start.date.year, start.date.month, start.date.day);
         }
 
         if self.player.ship.is_none() {
