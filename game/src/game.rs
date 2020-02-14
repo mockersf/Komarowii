@@ -30,7 +30,7 @@ impl Game {
 
     #[export]
     fn _ready(&mut self, owner: OwnerNode) {
-        let mut game_data = game_data::Game::new();
+        let mut es_game_data = game_data::ESGameLoader::empty();
 
         let mut data_dir = gdnative::Directory::new();
         data_dir.open("res://data".into()).unwrap();
@@ -47,10 +47,12 @@ impl Game {
             let full_path = format!("res://data/{}", path.to_string());
             let mut game_data_file = gdnative::File::new();
             game_data_file.open(full_path.into(), 1).unwrap();
-            game_data.add_data_file(&game_data_file.get_as_text().to_string());
+            es_game_data.load(&game_data_file.get_as_text().to_string());
             game_data_file.close();
         }
         data_dir.list_dir_end();
+
+        let game_data = es_game_data.create_game().unwrap();
 
         let days_since_beginning = game_data.get_nb_days_elapsed_since_beginning() as f32;
         let mut object_parent = unsafe {
@@ -80,12 +82,12 @@ impl Game {
                                     false,
                                 )
                                 .and_then(|s| s.cast::<Texture>());
-                            new_stellar_object
+                            let mut sprite = new_stellar_object
                                 .get_node("Sprite".into())
                                 .unwrap()
                                 .cast::<Sprite>()
-                                .unwrap()
-                                .set_texture(texture);
+                                .unwrap();
+                            sprite.set_texture(texture);
                         }
                         let rota = euclid::Rotation2D::new(euclid::Angle::radians(
                             days_since_beginning / object.period * 2.0 * std::f32::consts::PI,
@@ -107,21 +109,21 @@ impl Game {
             .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
         {
             unsafe {
-                if let Some(ref sprite) = game_data.player.ship.map(|s| s.sprite.clone()) {
-                    let texture = ResourceLoader::godot_singleton()
-                        .load(
-                            format!("res://images/{}.png", sprite).into(),
-                            "Texture".into(),
-                            false,
-                        )
-                        .and_then(|s| s.cast::<Texture>());
-                    new_player
-                        .get_node("Sprite".into())
-                        .unwrap()
-                        .cast::<Sprite>()
-                        .unwrap()
-                        .set_texture(texture);
-                }
+                let sprite = game_data.player.ship.sprite.clone();
+                let texture = ResourceLoader::godot_singleton()
+                    .load(
+                        format!("res://images/{}.png", sprite).into(),
+                        "Texture".into(),
+                        false,
+                    )
+                    .and_then(|s| s.cast::<Texture>());
+                let mut sprite = new_player
+                    .get_node("Sprite".into())
+                    .unwrap()
+                    .cast::<Sprite>()
+                    .unwrap();
+                sprite.set_texture(texture);
+                sprite.set_scale(euclid::vec2(0.5, 0.5));
                 let mut node = new_player.to_node();
                 node.set_name("player".into());
                 ship_parent.add_child(Some(node), false);

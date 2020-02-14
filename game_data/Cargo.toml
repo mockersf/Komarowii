@@ -10,3 +10,4 @@ license = "MIT"
 [dependencies]
 es_data_parser = { path = "../es_data_parser" }
 chrono = "0.4"
+rand = "0.7"
