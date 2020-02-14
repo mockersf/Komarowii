@@ -8,6 +8,7 @@ pub struct Game {
     star_scene: Option<PackedScene>,
     player_scene: Option<PackedScene>,
     player: Player,
+    zoom: euclid::Vector2D<f32, euclid::UnknownUnit>,
 }
 
 struct Player {
@@ -23,6 +24,7 @@ impl Game {
             star_scene: helpers::load_scene("res://game/StellarObject.tscn"),
             player_scene: helpers::load_scene("res://game/Player.tscn"),
             player: Player { direction: 0.0 },
+            zoom: euclid::vec2(1.0, 1.0),
         }
     }
 
@@ -85,19 +87,12 @@ impl Game {
                                 .unwrap()
                                 .set_texture(texture);
                         }
-                        godot_print!(
-                            "rotation status: period {}, days elapsed {}, angle {}",
-                            object.period,
-                            days_since_beginning,
-                            days_since_beginning / object.period * 2.0 * std::f32::consts::PI
-                        );
                         let rota = euclid::Rotation2D::new(euclid::Angle::radians(
                             days_since_beginning / object.period * 2.0 * std::f32::consts::PI,
                         ));
                         let position =
                             euclid::vec2::<f32, euclid::UnknownUnit>(0.0, object.distance);
                         let position = rota.transform_vector(position);
-                        godot_print!("---> position {:?}", position);
                         new_stellar_object.translate(position);
                         object_parent.add_child(Some(new_stellar_object.to_node()), false);
                     }
@@ -111,7 +106,6 @@ impl Game {
             .and_then(|player_scene| (&player_scene).instance(0))
             .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
         {
-            godot_print!("adding player");
             unsafe {
                 if let Some(ref sprite) = game_data.player.ship.map(|s| s.sprite.clone()) {
                     let texture = ResourceLoader::godot_singleton()
@@ -163,6 +157,22 @@ impl Game {
         unsafe {
             player.set_rotation(rotation as f64 - std::f64::consts::PI / 2.0);
             player.set_position(player.get_position() + movement * speed * delta);
+        }
+        if input.is_key_pressed(GlobalConstants::KEY_PAGEDOWN)
+            || input.is_mouse_button_pressed(GlobalConstants::BUTTON_WHEEL_UP)
+        {
+            self.zoom = self.zoom * 1.1;
+        }
+        if input.is_key_pressed(GlobalConstants::KEY_PAGEUP)
+            || input.is_mouse_button_pressed(GlobalConstants::BUTTON_WHEEL_DOWN)
+        {
+            self.zoom = self.zoom * 0.9;
+        }
+        let mut camera = unsafe { player.get_node("Camera2D".into()) }
+            .and_then(|new_node| unsafe { new_node.cast::<Camera2D>() })
+            .unwrap();
+        unsafe {
+            camera.set_zoom(self.zoom);
         }
     }
 }
