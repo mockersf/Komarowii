@@ -161,12 +161,12 @@ impl Game {
         if input.is_key_pressed(GlobalConstants::KEY_PAGEDOWN)
             || input.is_mouse_button_pressed(GlobalConstants::BUTTON_WHEEL_UP)
         {
-            self.zoom = self.zoom * 1.1;
+            self.zoom *= 1.1;
         }
         if input.is_key_pressed(GlobalConstants::KEY_PAGEUP)
             || input.is_mouse_button_pressed(GlobalConstants::BUTTON_WHEEL_DOWN)
         {
-            self.zoom = self.zoom * 0.9;
+            self.zoom *= 0.9;
         }
         let mut camera = unsafe { player.get_node("Camera2D".into()) }
             .and_then(|new_node| unsafe { new_node.cast::<Camera2D>() })
