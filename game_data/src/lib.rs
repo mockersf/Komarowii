@@ -1,4 +1,3 @@
-use std::fs;
 use std::sync::Arc;
 
 #[derive(Debug)]
@@ -9,7 +8,8 @@ pub struct Ship {
 
 #[derive(Debug)]
 pub struct Player {
-    pub ship: Arc<Ship>,
+    pub ship: Option<Arc<Ship>>,
+    pub current_system: Option<Arc<System>>,
 }
 
 #[derive(Debug)]
@@ -27,72 +27,100 @@ pub struct System {
 
 #[derive(Debug)]
 pub struct Game {
+    pub start_system_name: Option<String>,
     pub player: Player,
-    pub systems: Vec<System>,
+    pub systems: Vec<Arc<System>>,
     pub ships: Vec<Arc<Ship>>,
 }
 
-pub fn start_from_es(path: &str) -> Game {
-    let es_game_data_source =
-        fs::read_to_string(path).expect("Something went wrong reading the file");
+impl Game {
+    pub fn new() -> Self {
+        Game {
+            player: Player {
+                ship: None,
+                current_system: None,
+            },
+            systems: vec![],
+            ships: vec![],
+            start_system_name: None,
+        }
+    }
 
-    start_from_es_data(&es_game_data_source)
-}
+    pub fn add_data_file(&mut self, es_game_data_source: &str) {
+        let es_game_data = es_data_parser::parse(es_game_data_source);
 
-pub fn start_from_es_data(es_game_data_source: &str) -> Game {
-    let es_game_data = es_data_parser::parse(es_game_data_source);
-
-    let ships = es_game_data
-        .iter()
-        .filter_map(|object| {
-            if let es_data_parser::Object::Ship(ship) = object {
-                Some(ship)
-            } else {
-                None
-            }
-        })
-        .map(|ship| {
-            Arc::new(Ship {
-                name: String::from(ship.name),
-                sprite: match ship.sprite {
-                    es_data_parser::Sprite::Simple(sprite) => String::from(sprite),
-                    es_data_parser::Sprite::Sprite { name, .. } => format!("{}=0", name),
-                },
+        let mut ships = es_game_data
+            .iter()
+            .filter_map(|object| {
+                if let es_data_parser::Object::Ship(ship) = object {
+                    Some(ship)
+                } else {
+                    None
+                }
             })
-        })
-        .collect::<Vec<_>>();
-
-    let systems = es_game_data
-        .iter()
-        .filter_map(|object| {
-            if let es_data_parser::Object::System(system) = object {
-                Some(system)
-            } else {
-                None
-            }
-        })
-        .map(|system| System {
-            name: String::from(system.name),
-            objects: system
-                .objects
-                .iter()
-                .map(|object| Object {
-                    sprite: object.sprite.map(String::from),
-                    distance: object.distance.unwrap_or(0.0),
-                    period: object.period,
+            .map(|ship| {
+                Arc::new(Ship {
+                    name: String::from(ship.name),
+                    sprite: match ship.sprite {
+                        es_data_parser::Sprite::Simple(sprite) => String::from(sprite),
+                        es_data_parser::Sprite::Sprite { name, .. } => format!("{}=0", name),
+                    },
                 })
-                .collect(),
-        })
-        .collect::<Vec<_>>();
-    Game {
-        player: Player {
-            ship: ships
-                .iter()
-                .find(|ship| ship.name == "Shuttle")
-                .unwrap()
-                .clone(),
-        },
-        systems,
-        ships,
+            })
+            .collect::<Vec<_>>();
+
+        let mut systems = es_game_data
+            .iter()
+            .filter_map(|object| {
+                if let es_data_parser::Object::System(system) = object {
+                    Some(system)
+                } else {
+                    None
+                }
+            })
+            .map(|system| {
+                Arc::new(System {
+                    name: String::from(system.name),
+                    objects: system
+                        .objects
+                        .iter()
+                        .map(|object| Object {
+                            sprite: object.sprite.map(String::from),
+                            distance: object.distance.unwrap_or(0.0),
+                            period: object.period,
+                        })
+                        .collect(),
+                })
+            })
+            .collect::<Vec<_>>();
+
+        if let Some(start) = es_game_data
+            .iter()
+            .filter_map(|object| {
+                if let es_data_parser::Object::Start(start) = object {
+                    Some(start)
+                } else {
+                    None
+                }
+            })
+            .next()
+        {
+            self.start_system_name = Some(String::from(start.system));
+        }
+
+        if self.player.ship.is_none() {
+            self.player.ship = ships.iter().find(|ship| ship.name == "Shuttle").cloned();
+        }
+        self.ships.append(&mut ships);
+        self.systems.append(&mut systems);
+        if self.player.current_system.is_none() {
+            if let Some(system_name) = self.start_system_name.clone() {
+                self.player.current_system = self
+                    .systems
+                    .iter()
+                    .find(|system| system.name == system_name)
+                    .cloned();
+            }
+        }
     }
 }
