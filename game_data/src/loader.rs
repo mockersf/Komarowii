@@ -12,6 +12,15 @@ pub struct ESGameLoader {
     start: Option<(String, (i32, u32, u32))>,
 }
 
+fn es_object_to_object<'a>(object: &es_data_parser::SystemObject<'a>) -> Object {
+    Object {
+        sprite: object.sprite.map(String::from),
+        distance: object.distance.unwrap_or(0.0),
+        period: object.period,
+        objects: object.objects.iter().map(es_object_to_object).collect(),
+    }
+}
+
 #[allow(clippy::new_without_default)]
 impl ESGameLoader {
     /// Start an empty es game loader
@@ -57,15 +66,7 @@ impl ESGameLoader {
             })
             .map(|system| System {
                 name: String::from(system.name),
-                objects: system
-                    .objects
-                    .iter()
-                    .map(|object| Object {
-                        sprite: object.sprite.map(String::from),
-                        distance: object.distance.unwrap_or(0.0),
-                        period: object.period,
-                    })
-                    .collect(),
+                objects: system.objects.iter().map(es_object_to_object).collect(),
             })
             .collect::<Vec<_>>();
         self.systems.append(&mut systems);

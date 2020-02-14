@@ -14,6 +14,8 @@
 
 use std::sync::Arc;
 
+use gdnative::{FromVariant, ToVariant};
+
 mod loader;
 pub use loader::ESGameLoader;
 
@@ -36,7 +38,7 @@ pub struct Player {
 }
 
 /// A stellar object
-#[derive(Debug)]
+#[derive(Debug, ToVariant, FromVariant)]
 pub struct Object {
     /// it's sprite
     pub sprite: Option<String>,
@@ -44,6 +46,8 @@ pub struct Object {
     pub distance: f32,
     /// it's period
     pub period: f32,
+    /// it's subobjects
+    pub objects: Vec<Object>,
 }
 
 /// A system

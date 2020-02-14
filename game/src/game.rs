@@ -4,6 +4,7 @@ use gdnative::*;
 use helpers::{max, min, stringify_fn};
 
 use crate::square_of_background_stars::{self, SquareOfBackgroundStars};
+use crate::stellar_object::StellarObject;
 
 const ZOOM_MIN: f32 = 0.5;
 const ZOOM_MAX: f32 = 5.0;
@@ -123,6 +124,14 @@ impl Game {
                         let position = vec2::<f32, UnknownUnit>(0.0, object.distance);
                         let position = rota.transform_vector(position);
                         new_stellar_object.translate(position);
+                        new_stellar_object.call_deferred(
+                            stringify_fn!(StellarObject, set_subobjects),
+                            &[
+                                object.objects.to_variant(),
+                                days_since_beginning.to_variant(),
+                            ],
+                        );
+
                         object_parent.add_child(Some(new_stellar_object.to_node()), false);
                     }
                 };
