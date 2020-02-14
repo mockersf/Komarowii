@@ -105,3 +105,13 @@ dependencies = [
     "bom",
     "cleanup-es"
 ]
+
+[tasks.trigger-nightly]
+description = "Trigger a dispatch event on github to trigger a nightly build"
+category = "Publish"
+workspace = false
+script = [
+    '''
+    curl -X POST https://api.github.com/repos/mockersf/Komarowii/dispatches -H "Authorization: token $GITHUB_DISPATCH_TOKEN" -d '{"event_type": "trigger nightly"}'
+    '''
+]
