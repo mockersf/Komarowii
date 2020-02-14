@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # gdnative = "0.7"
-gdnative = { git = "https://github.com/GodotNativeTools/godot-rust", rev = "e45f4ffd3232ee24cb5bda791f369118cbfd1cb5" }
+gdnative = { git = "https://github.com/GodotNativeTools/godot-rust" }
 euclid = "0.20"
 rand = "0.7.3"
 
