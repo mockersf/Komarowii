@@ -1,0 +1,7 @@
+[gd_scene format=2]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Star" type="ColorRect" parent="."]
+margin_right = 1.0
+margin_bottom = 1.0

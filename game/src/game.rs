@@ -1,14 +1,26 @@
+use euclid::{vec2, UnknownUnit, Vector2D};
 use gdnative::*;
+
+use helpers::{max, min, stringify_fn};
+
+use crate::square_of_background_stars::{self, SquareOfBackgroundStars};
+
+const ZOOM_MIN: f32 = 0.5;
+const ZOOM_MAX: f32 = 5.0;
 
 type OwnerNode = Node2D;
 
 #[derive(NativeClass)]
 #[inherit(OwnerNode)]
+#[register_with(Self::register_signals)]
 pub struct Game {
     star_scene: Option<PackedScene>,
     player_scene: Option<PackedScene>,
+    background_square_scene: Option<PackedScene>,
+    filled_background: std::collections::HashSet<(i64, i64)>,
     player: Player,
-    zoom: euclid::Vector2D<f32, euclid::UnknownUnit>,
+    zoom: f32,
+    zoom_change: f32,
 }
 
 struct Player {
@@ -17,14 +29,31 @@ struct Player {
 
 unsafe impl Send for Game {}
 
+const CHANGE_ZOOM_SIGNAL: &str = "change_zoom";
+
 #[methods]
 impl Game {
+    fn register_signals(builder: &init::ClassBuilder<Self>) {
+        builder.add_signal(init::Signal {
+            name: CHANGE_ZOOM_SIGNAL,
+            args: &[init::SignalArgument {
+                name: "data",
+                default: Variant::from_f64(1.0),
+                export_info: init::ExportInfo::new(VariantType::F64),
+                usage: init::PropertyUsage::DEFAULT,
+            }],
+        });
+    }
+
     fn _init(_owner: OwnerNode) -> Self {
         Game {
             star_scene: helpers::load_scene("res://game/StellarObject.tscn"),
             player_scene: helpers::load_scene("res://game/Player.tscn"),
+            background_square_scene: helpers::load_scene("res://game/SquareOfBackgroundStars.tscn"),
+            filled_background: std::collections::HashSet::new(),
             player: Player { direction: 0.0 },
-            zoom: euclid::vec2(1.0, 1.0),
+            zoom: 1.0,
+            zoom_change: 0.0,
         }
     }
 
@@ -63,7 +92,6 @@ impl Game {
         game_data
             .player
             .current_system
-            .unwrap()
             .objects
             .iter()
             .for_each(|object| {
@@ -92,8 +120,7 @@ impl Game {
                         let rota = euclid::Rotation2D::new(euclid::Angle::radians(
                             days_since_beginning / object.period * 2.0 * std::f32::consts::PI,
                         ));
-                        let position =
-                            euclid::vec2::<f32, euclid::UnknownUnit>(0.0, object.distance);
+                        let position = vec2::<f32, UnknownUnit>(0.0, object.distance);
                         let position = rota.transform_vector(position);
                         new_stellar_object.translate(position);
                         object_parent.add_child(Some(new_stellar_object.to_node()), false);
@@ -123,7 +150,7 @@ impl Game {
                     .cast::<Sprite>()
                     .unwrap();
                 sprite.set_texture(texture);
-                sprite.set_scale(euclid::vec2(0.5, 0.5));
+                sprite.set_scale(vec2(0.5, 0.5));
                 let mut node = new_player.to_node();
                 node.set_name("player".into());
                 ship_parent.add_child(Some(node), false);
@@ -132,10 +159,69 @@ impl Game {
     }
 
     #[export]
-    fn _process(&mut self, owner: OwnerNode, delta: f32) {
+    fn _process(&mut self, mut owner: OwnerNode, delta: f32) {
+        let view = unsafe { owner.get_viewport().unwrap().get_visible_rect() };
+        let mut background_parent = unsafe {
+            owner
+                .get_node("background".into())
+                .expect("node background is present")
+        };
+        let player_position = unsafe {
+            owner
+                .get_node("ships/player".into())
+                .and_then(|new_node| new_node.cast::<Node2D>())
+                .unwrap()
+                .get_position()
+        };
+        let min_x = player_position.x - view.size.width * self.zoom / 2.0;
+        let max_x = player_position.x + view.size.width * self.zoom / 2.0;
+        let min_y = player_position.y - view.size.height * self.zoom / 2.0;
+        let max_y = player_position.y + view.size.height * self.zoom / 2.0;
+        for background_x in min_x as i64 / square_of_background_stars::SQUARE_SIZE - 1
+            ..=max_x as i64 / square_of_background_stars::SQUARE_SIZE + 1
+        {
+            for background_y in min_y as i64 / square_of_background_stars::SQUARE_SIZE - 1
+                ..=max_y as i64 / square_of_background_stars::SQUARE_SIZE + 1
+            {
+                if !self
+                    .filled_background
+                    .contains(&(background_x, background_y))
+                {
+                    if let Some(mut background_square) = self
+                        .background_square_scene
+                        .as_ref()
+                        .and_then(|bs_scene| (&bs_scene).instance(0))
+                        .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
+                    {
+                        unsafe {
+                            background_square.translate(vec2(
+                                (background_x * square_of_background_stars::SQUARE_SIZE) as f32,
+                                (background_y * square_of_background_stars::SQUARE_SIZE) as f32,
+                            ));
+                            background_square.call_deferred(
+                                stringify_fn!(SquareOfBackgroundStars, change_zoom),
+                                &[Variant::from_f64(self.zoom.into())],
+                            );
+                            background_parent.add_child(Some(background_square.to_node()), false);
+                            owner
+                                .connect(
+                                    GodotString::from_str(CHANGE_ZOOM_SIGNAL),
+                                    Some(background_square.to_object()),
+                                    stringify_fn!(SquareOfBackgroundStars, change_zoom),
+                                    VariantArray::new(),
+                                    0,
+                                )
+                                .unwrap();
+                        }
+                    }
+                    self.filled_background.insert((background_x, background_y));
+                }
+            }
+        }
+
         let speed = 100.0;
         let angular_speed = 0.05;
-        let mut movement: euclid::Vector2D<f32, euclid::UnknownUnit> = euclid::vec2(0.0, 0.0);
+        let mut movement: Vector2D<f32, UnknownUnit> = vec2(0.0, 0.0);
         let mut rotation = self.player.direction;
         let input = Input::godot_singleton();
         if input.is_action_pressed("ui_right".into()) {
@@ -163,18 +249,38 @@ impl Game {
         if input.is_key_pressed(GlobalConstants::KEY_PAGEDOWN)
             || input.is_mouse_button_pressed(GlobalConstants::BUTTON_WHEEL_UP)
         {
-            self.zoom *= 1.1;
+            self.zoom_change = 0.1;
         }
         if input.is_key_pressed(GlobalConstants::KEY_PAGEUP)
             || input.is_mouse_button_pressed(GlobalConstants::BUTTON_WHEEL_DOWN)
         {
-            self.zoom *= 0.9;
+            self.zoom_change = -0.1;
         }
-        let mut camera = unsafe { player.get_node("Camera2D".into()) }
-            .and_then(|new_node| unsafe { new_node.cast::<Camera2D>() })
-            .unwrap();
-        unsafe {
-            camera.set_zoom(self.zoom);
+        if self.zoom_change != 0. {
+            self.zoom = max!(min!(self.zoom + self.zoom_change, ZOOM_MAX), ZOOM_MIN);
+            let mut camera = unsafe { player.get_node("Camera2D".into()) }
+                .and_then(|new_node| unsafe { new_node.cast::<Camera2D>() })
+                .unwrap();
+            unsafe {
+                camera.set_zoom(vec2(self.zoom, self.zoom));
+            }
+            self.zoom_change = 0.;
+            unsafe {
+                owner.emit_signal(
+                    GodotString::from_str(CHANGE_ZOOM_SIGNAL),
+                    &[Variant::from_f64(self.zoom.into())],
+                );
+            }
+        }
+    }
+
+    #[export]
+    fn _input(&mut self, _owner: OwnerNode, event: InputEvent) {
+        if let Some(iepg) = event.cast::<InputEventPanGesture>() {
+            let delta = iepg.get_delta();
+            if delta.x.abs() < 0.04 {
+                self.zoom_change = delta.y / 5.;
+            }
         }
     }
 }
