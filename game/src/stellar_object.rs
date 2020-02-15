@@ -80,7 +80,10 @@ impl StellarObject {
                     new_stellar_object.translate(position);
                     new_stellar_object.call_deferred(
                         stringify_fn!(StellarObject, set_subobjects),
-                        &[object.objects.to_variant()],
+                        &[
+                            object.objects.to_variant(),
+                            days_since_beginning.to_variant(),
+                        ],
                     );
 
                     object_parent.add_child(Some(new_stellar_object.to_node()), false);
