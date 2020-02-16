@@ -172,7 +172,11 @@ impl Game {
         let view = unsafe { owner.get_viewport().unwrap().get_visible_rect() };
         let mut background_parent = unsafe {
             owner
-                .get_node("background".into())
+                .get_node("ParallaxBackground".into())
+                .and_then(|node| node.cast::<ParallaxBackground>())
+                .and_then(|node| node.get_node("ParallaxLayer".into()))
+                .and_then(|node| node.cast::<ParallaxLayer>())
+                .and_then(|node| node.get_node("background".into()))
                 .expect("node background is present")
         };
         let player_position = unsafe {
