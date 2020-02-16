@@ -104,6 +104,7 @@ jobs:
           mkdir -p target/release
           mv libs-macos/* target/release/
       - name: Download and set up endless sky data
+        if: env.LAST_BUILD != github.sha
         run: cargo make prepare-release
       - name: Export Game
         if: env.LAST_BUILD != github.sha
