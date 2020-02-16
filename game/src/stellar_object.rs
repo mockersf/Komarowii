@@ -43,7 +43,6 @@ impl StellarObject {
         objects: Vec<game_data::Object>,
         days_since_beginning: f32,
     ) {
-        godot_print!("subobjects: {:?}", objects);
         let mut object_parent = unsafe {
             owner
                 .get_node("objects".into())
