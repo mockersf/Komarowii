@@ -8,6 +8,8 @@ use crate::stellar_object::StellarObject;
 
 const ZOOM_MIN: f32 = 0.5;
 const ZOOM_MAX: f32 = 5.0;
+const CHANGE_ZOOM_SIGNAL: &str = "change_zoom";
+const BACKGROUND_PARALLAX_SCALE: f32 = 0.2;
 
 type OwnerNode = Node2D;
 
@@ -29,8 +31,6 @@ struct Player {
 }
 
 unsafe impl Send for Game {}
-
-const CHANGE_ZOOM_SIGNAL: &str = "change_zoom";
 
 #[methods]
 impl Game {
@@ -186,10 +186,14 @@ impl Game {
                 .unwrap()
                 .get_position()
         };
-        let min_x = player_position.x - view.size.width * self.zoom / 2.0;
-        let max_x = player_position.x + view.size.width * self.zoom / 2.0;
-        let min_y = player_position.y - view.size.height * self.zoom / 2.0;
-        let max_y = player_position.y + view.size.height * self.zoom / 2.0;
+        let min_x =
+            player_position.x * BACKGROUND_PARALLAX_SCALE - view.size.width * self.zoom / 2.0;
+        let max_x =
+            player_position.x * BACKGROUND_PARALLAX_SCALE + view.size.width * self.zoom / 2.0;
+        let min_y =
+            player_position.y * BACKGROUND_PARALLAX_SCALE - view.size.height * self.zoom / 2.0;
+        let max_y =
+            player_position.y * BACKGROUND_PARALLAX_SCALE + view.size.height * self.zoom / 2.0;
         for background_x in min_x as i64 / square_of_background_stars::SQUARE_SIZE - 1
             ..=max_x as i64 / square_of_background_stars::SQUARE_SIZE + 1
         {
@@ -231,6 +235,11 @@ impl Game {
                 }
             }
         }
+        godot_print!(
+            "squares: {} {}",
+            self.filled_background.len(),
+            BACKGROUND_PARALLAX_SCALE
+        );
 
         let speed = 100.0;
         let angular_speed = 0.05;
