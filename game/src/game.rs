@@ -172,11 +172,7 @@ impl Game {
         let view = unsafe { owner.get_viewport().unwrap().get_visible_rect() };
         let mut background_parent = unsafe {
             owner
-                .get_node("ParallaxBackground".into())
-                .and_then(|node| node.cast::<ParallaxBackground>())
-                .and_then(|node| node.get_node("ParallaxLayer".into()))
-                .and_then(|node| node.cast::<ParallaxLayer>())
-                .and_then(|node| node.get_node("background".into()))
+                .get_node("ParallaxBackground/ParallaxLayer/background".into())
                 .expect("node background is present")
         };
         let player_position = unsafe {
@@ -235,11 +231,6 @@ impl Game {
                 }
             }
         }
-        godot_print!(
-            "squares: {} {}",
-            self.filled_background.len(),
-            BACKGROUND_PARALLAX_SCALE
-        );
 
         let speed = 100.0;
         let angular_speed = 0.05;

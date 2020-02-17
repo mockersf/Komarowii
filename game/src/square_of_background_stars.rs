@@ -90,9 +90,7 @@ impl SquareOfBackgroundStars {
                 unsafe {
                     new_star.translate(vec2(x, y));
                     new_star
-                        .get_node("Control".into())
-                        .and_then(|node| node.cast::<Control>())
-                        .and_then(|node| node.get_node("Star".into()))
+                        .get_node("Control/Star".into())
                         .and_then(|node| node.cast::<ColorRect>())
                         .expect("ColorRect Star is present in a star")
                         .set_frame_color(color.clone());
@@ -110,9 +108,7 @@ impl SquareOfBackgroundStars {
                 .get_children()
                 .iter_mut()
                 .filter_map(|c| c.try_to_object::<Node2D>())
-                .filter_map(|node| node.get_node("Control".into()))
-                .filter_map(|node| node.cast::<Control>())
-                .filter_map(|node| node.get_node("Star".into()))
+                .filter_map(|node| node.get_node("Control/Star".into()))
                 .filter_map(|node| node.cast::<ColorRect>())
                 .for_each(|mut star_node| star_node.set_size(vec2(zoom as f32, zoom as f32)));
         }
