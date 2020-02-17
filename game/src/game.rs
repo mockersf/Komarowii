@@ -168,7 +168,15 @@ impl Game {
     }
 
     #[export]
-    fn _process(&mut self, mut owner: OwnerNode, delta: f32) {
+    fn _process(&mut self, owner: OwnerNode, delta: f32) {
+        self.update_background(owner);
+
+        self.player_movement(owner, delta);
+
+        self.zoom(owner);
+    }
+
+    fn update_background(&mut self, mut owner: OwnerNode) {
         let view = unsafe { owner.get_viewport().unwrap().get_visible_rect() };
         let mut background_parent = unsafe {
             owner
@@ -231,7 +239,9 @@ impl Game {
                 }
             }
         }
+    }
 
+    fn player_movement(&mut self, owner: OwnerNode, delta: f32) {
         let speed = 100.0;
         let angular_speed = 0.05;
         let mut movement: Vector2D<f32, UnknownUnit> = vec2(0.0, 0.0);
@@ -259,6 +269,14 @@ impl Game {
             player.set_rotation(rotation as f64 - std::f64::consts::PI / 2.0);
             player.set_position(player.get_position() + movement * speed * delta);
         }
+    }
+
+    fn zoom(&mut self, mut owner: OwnerNode) {
+        let input = Input::godot_singleton();
+        let player = unsafe { owner.get_node("ships/player".into()) }
+            .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
+            .unwrap();
+
         if input.is_key_pressed(GlobalConstants::KEY_PAGEDOWN)
             || input.is_mouse_button_pressed(GlobalConstants::BUTTON_WHEEL_UP)
         {
