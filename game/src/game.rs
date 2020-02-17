@@ -1,5 +1,6 @@
-use euclid::{vec2, UnknownUnit, Vector2D};
+use euclid::{vec2, Angle, Rotation2D, UnknownUnit, Vector2D};
 use gdnative::*;
+use rand::Rng;
 
 use helpers::{max, min, stringify_fn};
 
@@ -27,10 +28,13 @@ pub struct Game {
 }
 
 struct Player {
-    direction: f32,
+    direction: Angle<f32>,
+    speed: Vector2D<f32, UnknownUnit>,
 }
 
 unsafe impl Send for Game {}
+
+const MAX_ORIGINAL_SPEED: f32 = 10.0;
 
 #[methods]
 impl Game {
@@ -47,12 +51,21 @@ impl Game {
     }
 
     fn _init(_owner: OwnerNode) -> Self {
+        let mut rng = rand::thread_rng();
+        let start_speed = vec2(
+            rng.gen_range(-MAX_ORIGINAL_SPEED, MAX_ORIGINAL_SPEED),
+            rng.gen_range(-MAX_ORIGINAL_SPEED, MAX_ORIGINAL_SPEED),
+        );
+        let start_direction = start_speed.angle_from_x_axis();
         Game {
             star_scene: helpers::load_scene("res://game/StellarObject.tscn"),
             player_scene: helpers::load_scene("res://game/Player.tscn"),
             background_square_scene: helpers::load_scene("res://game/SquareOfBackgroundStars.tscn"),
             filled_background: std::collections::HashSet::new(),
-            player: Player { direction: 0.0 },
+            player: Player {
+                direction: start_direction + Angle::pi(),
+                speed: start_speed,
+            },
             zoom: 1.0,
             zoom_change: 0.0,
         }
@@ -118,7 +131,7 @@ impl Game {
                                 .unwrap();
                             sprite.set_texture(texture);
                         }
-                        let rota = euclid::Rotation2D::new(euclid::Angle::radians(
+                        let rota = Rotation2D::new(Angle::radians(
                             days_since_beginning / object.period * 2.0 * std::f32::consts::PI,
                         ));
                         let position = vec2::<f32, UnknownUnit>(0.0, object.distance);
@@ -242,32 +255,49 @@ impl Game {
     }
 
     fn player_movement(&mut self, owner: OwnerNode, delta: f32) {
-        let speed = 100.0;
-        let angular_speed = 0.05;
-        let mut movement: Vector2D<f32, UnknownUnit> = vec2(0.0, 0.0);
+        let thrust = 11.5;
+        let mass = 182.0;
+        let drag = 1.7;
+        let turn = 307.0;
+
+        let es_thrust_ratio = 3600.0;
+        let es_turn_ratio = 60.0;
+        let max_velocity_ratio = 0.005;
+        let turn_ratio = 0.01;
+
+        let acceleration = thrust * es_thrust_ratio / mass;
+        let max_velocity = thrust * es_thrust_ratio / drag * max_velocity_ratio;
+
+        let angular_speed = Angle::degrees(turn * es_turn_ratio * turn_ratio);
+        let mut new_acceleration_vec: Vector2D<f32, UnknownUnit> = vec2(0.0, 0.0);
         let mut rotation = self.player.direction;
         let input = Input::godot_singleton();
         if input.is_action_pressed("ui_right".into()) {
-            rotation += angular_speed;
+            rotation += angular_speed * delta;
         }
         if input.is_action_pressed("ui_left".into()) {
-            rotation -= angular_speed;
+            rotation -= angular_speed * delta;
         }
         if input.is_action_pressed("ui_down".into()) {
-            movement.x += 1.0;
+            let current_mov_angle = self.player.speed.angle_from_x_axis() + Angle::pi();
+            let target = current_mov_angle + Angle::pi();
+            let turn = target - rotation;
+            rotation += turn.signed() * delta;
         }
         if input.is_action_pressed("ui_up".into()) {
-            movement.x -= 1.0;
+            new_acceleration_vec.x -= acceleration;
         }
-        self.player.direction = rotation;
-        let rota = euclid::Rotation2D::new(euclid::Angle::radians(rotation));
-        let movement = rota.transform_vector(movement);
+        self.player.direction = rotation.positive();
+        let rota = Rotation2D::new(rotation);
+        let acceleration = rota.transform_vector(new_acceleration_vec);
         let mut player = unsafe { owner.get_node("ships/player".into()) }
             .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
             .unwrap();
+        let new_speed = acceleration * delta + self.player.speed;
+        self.player.speed = new_speed.with_max_length(max_velocity);
         unsafe {
-            player.set_rotation(rotation as f64 - std::f64::consts::PI / 2.0);
-            player.set_position(player.get_position() + movement * speed * delta);
+            player.set_rotation((rotation - Angle::frac_pi_2()).get() as f64);
+            player.set_position(player.get_position() + self.player.speed * delta);
         }
     }
 
