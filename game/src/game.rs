@@ -312,6 +312,15 @@ impl Game {
         {
             self.zoom_change = 0.1;
         }
+        if input.is_key_pressed(GlobalConstants::KEY_ESCAPE) {
+            unsafe {
+                owner
+                    .get_tree()
+                    .expect("was able to get tree from node")
+                    .change_scene("res://menu/MainMenu.tscn".into())
+                    .expect("was able to change scene");
+            }
+        }
         if input.is_key_pressed(GlobalConstants::KEY_PAGEUP)
             || input.is_mouse_button_pressed(GlobalConstants::BUTTON_WHEEL_DOWN)
         {
