@@ -3,7 +3,7 @@ use gdnative::*;
 use rand::Rng;
 
 /// probability there will be a star at any point
-const STAR_PROBABILITY: f32 = 0.0003;
+const STAR_PROBABILITY: f32 = 0.0001;
 
 pub const SQUARE_SIZE: i64 = 500;
 

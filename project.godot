@@ -19,6 +19,10 @@ config/name="Komarowii"
 run/main_scene="res://menu/MainMenu.tscn"
 config/icon="res://icon.png"
 
+[memory]
+
+limits/message_queue/max_size_kb=8192
+
 [rendering]
 
 vram_compression/import_etc=true
