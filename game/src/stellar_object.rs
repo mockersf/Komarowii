@@ -2,6 +2,8 @@ use gdnative::*;
 
 use helpers::stringify_fn;
 
+const DEFAULT_COLLISION_DIAMETER: f32 = 200.0;
+
 type OwnerNode = Area2D;
 
 #[derive(NativeClass)]
@@ -64,12 +66,28 @@ impl StellarObject {
                                 false,
                             )
                             .and_then(|s| s.cast::<Texture>());
-                        let mut sprite = new_stellar_object
-                            .get_node("Sprite".into())
+                        if let Some(texture) = texture {
+                            let mut sprite = new_stellar_object
+                                .get_node("Sprite".into())
+                                .unwrap()
+                                .cast::<Sprite>()
+                                .unwrap();
+                            let size = texture.get_size() / DEFAULT_COLLISION_DIAMETER;
+                            sprite.set_texture(Some(texture));
+                            new_stellar_object
+                                .get_node("CollisionShape2D".into())
+                                .unwrap()
+                                .cast::<CollisionShape2D>()
+                                .unwrap()
+                                .set_scale(size)
+                        }
+                    } else {
+                        new_stellar_object
+                            .get_node("CollisionShape2D".into())
                             .unwrap()
-                            .cast::<Sprite>()
-                            .unwrap();
-                        sprite.set_texture(texture);
+                            .cast::<CollisionShape2D>()
+                            .unwrap()
+                            .set_disabled(true);
                     }
                     let rota = euclid::Rotation2D::new(euclid::Angle::radians(
                         days_since_beginning / object.period * 2.0 * std::f32::consts::PI,

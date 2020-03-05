@@ -86,54 +86,30 @@ impl Game {
                         .get_node("objects".into())
                         .expect("objects is present")
                 };
-                game_data
-                    .player
-                    .current_system
-                    .objects
-                    .iter()
-                    .for_each(|object| {
-                        if let Some(mut new_stellar_object) = self
-                            .star_scene
-                            .as_ref()
-                            .and_then(|star_scene| (&star_scene).instance(0))
-                            .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
-                        {
-                            unsafe {
-                                if let Some(ref sprite) = object.sprite {
-                                    let texture = ResourceLoader::godot_singleton()
-                                        .load(
-                                            format!("res://images/{}.png", sprite).into(),
-                                            "Texture".into(),
-                                            false,
-                                        )
-                                        .and_then(|s| s.cast::<Texture>());
-                                    let mut sprite = new_stellar_object
-                                        .get_node("Sprite".into())
-                                        .unwrap()
-                                        .cast::<Sprite>()
-                                        .unwrap();
-                                    sprite.set_texture(texture);
-                                }
-                                let rota = Rotation2D::new(Angle::radians(
-                                    days_since_beginning / object.period
-                                        * 2.0
-                                        * std::f32::consts::PI,
-                                ));
-                                let position = vec2::<f32, UnknownUnit>(0.0, object.distance);
-                                let position = rota.transform_vector(position);
-                                new_stellar_object.translate(position);
-                                new_stellar_object.call_deferred(
-                                    stringify_fn!(StellarObject, set_subobjects),
-                                    &[
-                                        object.objects.to_variant(),
-                                        days_since_beginning.to_variant(),
-                                    ],
-                                );
+                if let Some(mut new_stellar_object) = self
+                    .star_scene
+                    .as_ref()
+                    .and_then(|star_scene| (&star_scene).instance(0))
+                    .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
+                {
+                    unsafe {
+                        new_stellar_object
+                            .get_node("CollisionShape2D".into())
+                            .unwrap()
+                            .cast::<CollisionShape2D>()
+                            .unwrap()
+                            .set_disabled(true);
+                        new_stellar_object.call_deferred(
+                            stringify_fn!(StellarObject, set_subobjects),
+                            &[
+                                game_data.player.current_system.objects.to_variant(),
+                                days_since_beginning.to_variant(),
+                            ],
+                        );
 
-                                object_parent.add_child(Some(new_stellar_object.to_node()), false);
-                            }
-                        };
-                    });
+                        object_parent.add_child(Some(new_stellar_object.to_node()), false);
+                    }
+                }
 
                 let mut ship_parent =
                     unsafe { owner.get_node("ships".into()).expect("ships is present") };
