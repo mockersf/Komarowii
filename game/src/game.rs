@@ -73,111 +73,100 @@ impl Game {
 
     #[export]
     fn _ready(&mut self, owner: OwnerNode) {
-        let mut es_game_data = game_data::ESGameLoader::empty();
+        let state_node = unsafe { owner.get_node("/root/State".into()) };
+        let state_instance: Instance<crate::state::State> =
+            unsafe { Instance::try_from_unsafe_base(state_node.unwrap()).unwrap() };
+        let state = state_instance.into_script();
+        state
+            .map(|state| {
+                let game_data = &state.game;
+                let days_since_beginning = game_data.get_nb_days_elapsed_since_beginning() as f32;
+                let mut object_parent = unsafe {
+                    owner
+                        .get_node("objects".into())
+                        .expect("objects is present")
+                };
+                game_data
+                    .player
+                    .current_system
+                    .objects
+                    .iter()
+                    .for_each(|object| {
+                        if let Some(mut new_stellar_object) = self
+                            .star_scene
+                            .as_ref()
+                            .and_then(|star_scene| (&star_scene).instance(0))
+                            .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
+                        {
+                            unsafe {
+                                if let Some(ref sprite) = object.sprite {
+                                    let texture = ResourceLoader::godot_singleton()
+                                        .load(
+                                            format!("res://images/{}.png", sprite).into(),
+                                            "Texture".into(),
+                                            false,
+                                        )
+                                        .and_then(|s| s.cast::<Texture>());
+                                    let mut sprite = new_stellar_object
+                                        .get_node("Sprite".into())
+                                        .unwrap()
+                                        .cast::<Sprite>()
+                                        .unwrap();
+                                    sprite.set_texture(texture);
+                                }
+                                let rota = Rotation2D::new(Angle::radians(
+                                    days_since_beginning / object.period
+                                        * 2.0
+                                        * std::f32::consts::PI,
+                                ));
+                                let position = vec2::<f32, UnknownUnit>(0.0, object.distance);
+                                let position = rota.transform_vector(position);
+                                new_stellar_object.translate(position);
+                                new_stellar_object.call_deferred(
+                                    stringify_fn!(StellarObject, set_subobjects),
+                                    &[
+                                        object.objects.to_variant(),
+                                        days_since_beginning.to_variant(),
+                                    ],
+                                );
 
-        let mut data_dir = gdnative::Directory::new();
-        data_dir.open("res://data".into()).unwrap();
+                                object_parent.add_child(Some(new_stellar_object.to_node()), false);
+                            }
+                        };
+                    });
 
-        data_dir.list_dir_begin(false, false).unwrap();
-        loop {
-            let path = data_dir.get_next();
-            if path.is_empty() {
-                break;
-            }
-            if !path.ends_with(&".txt".into()) {
-                continue;
-            }
-            let full_path = format!("res://data/{}", path.to_string());
-            let mut game_data_file = gdnative::File::new();
-            game_data_file.open(full_path.into(), 1).unwrap();
-            es_game_data.load(&game_data_file.get_as_text().to_string());
-            game_data_file.close();
-        }
-        data_dir.list_dir_end();
-
-        let game_data = es_game_data.create_game().unwrap();
-
-        let days_since_beginning = game_data.get_nb_days_elapsed_since_beginning() as f32;
-        let mut object_parent = unsafe {
-            owner
-                .get_node("objects".into())
-                .expect("objects is present")
-        };
-        game_data
-            .player
-            .current_system
-            .objects
-            .iter()
-            .for_each(|object| {
-                if let Some(mut new_stellar_object) = self
-                    .star_scene
+                let mut ship_parent =
+                    unsafe { owner.get_node("ships".into()).expect("ships is present") };
+                if let Some(new_player) = self
+                    .player_scene
                     .as_ref()
-                    .and_then(|star_scene| (&star_scene).instance(0))
+                    .and_then(|player_scene| (&player_scene).instance(0))
                     .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
                 {
                     unsafe {
-                        if let Some(ref sprite) = object.sprite {
-                            let texture = ResourceLoader::godot_singleton()
-                                .load(
-                                    format!("res://images/{}.png", sprite).into(),
-                                    "Texture".into(),
-                                    false,
-                                )
-                                .and_then(|s| s.cast::<Texture>());
-                            let mut sprite = new_stellar_object
-                                .get_node("Sprite".into())
-                                .unwrap()
-                                .cast::<Sprite>()
-                                .unwrap();
-                            sprite.set_texture(texture);
-                        }
-                        let rota = Rotation2D::new(Angle::radians(
-                            days_since_beginning / object.period * 2.0 * std::f32::consts::PI,
-                        ));
-                        let position = vec2::<f32, UnknownUnit>(0.0, object.distance);
-                        let position = rota.transform_vector(position);
-                        new_stellar_object.translate(position);
-                        new_stellar_object.call_deferred(
-                            stringify_fn!(StellarObject, set_subobjects),
-                            &[
-                                object.objects.to_variant(),
-                                days_since_beginning.to_variant(),
-                            ],
-                        );
-
-                        object_parent.add_child(Some(new_stellar_object.to_node()), false);
+                        let sprite = game_data.player.ship.sprite.clone();
+                        let texture = ResourceLoader::godot_singleton()
+                            .load(
+                                format!("res://images/{}.png", sprite).into(),
+                                "Texture".into(),
+                                false,
+                            )
+                            .and_then(|s| s.cast::<Texture>());
+                        let mut sprite = new_player
+                            .get_node("Sprite".into())
+                            .unwrap()
+                            .cast::<Sprite>()
+                            .unwrap();
+                        sprite.set_texture(texture);
+                        sprite.set_scale(vec2(0.5, 0.5));
+                        let mut node = new_player.to_node();
+                        node.set_name("player".into());
+                        ship_parent.add_child(Some(node), false);
                     }
-                };
-            });
-
-        let mut ship_parent = unsafe { owner.get_node("ships".into()).expect("ships is present") };
-        if let Some(new_player) = self
-            .player_scene
-            .as_ref()
-            .and_then(|player_scene| (&player_scene).instance(0))
-            .and_then(|new_node| unsafe { new_node.cast::<Node2D>() })
-        {
-            unsafe {
-                let sprite = game_data.player.ship.sprite.clone();
-                let texture = ResourceLoader::godot_singleton()
-                    .load(
-                        format!("res://images/{}.png", sprite).into(),
-                        "Texture".into(),
-                        false,
-                    )
-                    .and_then(|s| s.cast::<Texture>());
-                let mut sprite = new_player
-                    .get_node("Sprite".into())
-                    .unwrap()
-                    .cast::<Sprite>()
-                    .unwrap();
-                sprite.set_texture(texture);
-                sprite.set_scale(vec2(0.5, 0.5));
-                let mut node = new_player.to_node();
-                node.set_name("player".into());
-                ship_parent.add_child(Some(node), false);
-            }
-        }
+                }
+                ()
+            })
+            .unwrap();
     }
 
     #[export]

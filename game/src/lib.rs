@@ -18,12 +18,14 @@ use gdnative::*;
 
 mod game;
 mod square_of_background_stars;
+mod state;
 mod stellar_object;
 
 fn init(handle: gdnative::init::InitHandle) {
     handle.add_class::<game::Game>();
     handle.add_class::<stellar_object::StellarObject>();
     handle.add_class::<square_of_background_stars::SquareOfBackgroundStars>();
+    handle.add_class::<state::State>();
 }
 
 godot_gdnative_init!();
