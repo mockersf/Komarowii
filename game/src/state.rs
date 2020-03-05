@@ -15,7 +15,6 @@ unsafe impl Send for State {}
 #[methods]
 impl State {
     fn _init(_owner: OwnerNode) -> Self {
-        godot_print!("loading state");
         let mut es_game_data = game_data::ESGameLoader::empty();
 
         let mut data_dir = gdnative::Directory::new();
@@ -39,9 +38,7 @@ impl State {
         data_dir.list_dir_end();
 
         let game_data = es_game_data.create_game().unwrap();
-        let state = State { game: game_data };
-        godot_print!("saved at: {:p}", &state);
-        state
+        State { game: game_data }
     }
 
     fn register_properties(builder: &init::ClassBuilder<Self>) {
