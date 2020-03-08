@@ -8,6 +8,9 @@ anchor_bottom = 1.0
 margin_top = 0.609131
 margin_bottom = 0.609131
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Background" type="Control" parent="."]
 anchor_right = 1.0
@@ -30,13 +33,17 @@ margin_top = -214.0
 margin_right = 50.0
 margin_bottom = 214.0
 alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="MarginContainer" type="MarginContainer" parent="Menu"]
-margin_right = 100.0
-margin_bottom = 200.0
+margin_top = 2.0
+margin_right = 155.0
+margin_bottom = 202.0
 
 [node name="Title" type="Label" parent="Menu/MarginContainer"]
-margin_right = 100.0
+margin_right = 155.0
 margin_bottom = 200.0
 rect_min_size = Vector2( 100, 200 )
 custom_colors/font_color = Color( 1, 0.286275, 0.584314, 1 )
@@ -46,17 +53,24 @@ valign = 1
 uppercase = true
 
 [node name="Spacer" type="VSplitContainer" parent="Menu"]
-margin_top = 204.0
-margin_right = 100.0
-margin_bottom = 404.0
+margin_top = 206.0
+margin_right = 155.0
+margin_bottom = 406.0
 rect_min_size = Vector2( 0, 200 )
 
-[node name="MarginContainer2" type="MarginContainer" parent="Menu"]
-margin_top = 408.0
-margin_right = 100.0
-margin_bottom = 428.0
+[node name="GameControls" type="HBoxContainer" parent="Menu"]
+margin_top = 410.0
+margin_right = 155.0
+margin_bottom = 430.0
+alignment = 1
 
-[node name="Start" type="Button" parent="Menu/MarginContainer2"]
-margin_right = 100.0
+[node name="Start" type="Button" parent="Menu/GameControls"]
+margin_right = 82.0
 margin_bottom = 20.0
 text = "New Game"
+
+[node name="Continue" type="Button" parent="Menu/GameControls"]
+margin_left = 86.0
+margin_right = 155.0
+margin_bottom = 20.0
+text = "Continue"

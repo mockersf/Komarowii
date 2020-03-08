@@ -90,20 +90,20 @@ impl ESGameLoader {
     }
 
     /// Create a game from the loaded files
-    pub fn create_game(self) -> Result<Game, ()> {
+    pub fn create_game(&self) -> Result<Game, ()> {
         let mut rng = rand::thread_rng();
 
         if self.ships.is_empty() {
             return Err(());
         }
-        let ships: Vec<Arc<Ship>> = self.ships.into_iter().map(Arc::new).collect();
+        let ships: Vec<Arc<Ship>> = self.ships.iter().cloned().map(Arc::new).collect();
 
         if self.systems.is_empty() {
             return Err(());
         }
-        let systems: Vec<Arc<System>> = self.systems.into_iter().map(Arc::new).collect();
+        let systems: Vec<Arc<System>> = self.systems.iter().cloned().map(Arc::new).collect();
 
-        let (start_system, start_date) = if let Some(start) = self.start {
+        let (start_system, start_date) = if let Some(start) = self.start.clone() {
             let (y, m, d) = start.1;
             (
                 systems

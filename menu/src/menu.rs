@@ -69,17 +69,44 @@ impl Menu {
     #[export]
     fn _ready(&mut self, owner: OwnerNode) {
         unsafe {
-            if let Some(mut visi) = owner.get_node("Menu/MarginContainer2/Start".into()) {
+            if let Some(mut visi) = owner.get_node("Menu/GameControls/Start".into()) {
                 visi.connect(
                     helpers::Signal::Pressed.into(),
                     Some(owner.to_object()),
-                    stringify_fn!(Self, _start_game),
+                    stringify_fn!(Self, _new_game),
+                    VariantArray::new(),
+                    0,
+                )
+                .expect("signal connected");
+            }
+            if let Some(mut visi) = owner.get_node("Menu/GameControls/Continue".into()) {
+                visi.connect(
+                    helpers::Signal::Pressed.into(),
+                    Some(owner.to_object()),
+                    stringify_fn!(Self, _continue_game),
                     VariantArray::new(),
                     0,
                 )
                 .expect("signal connected");
             }
         }
+
+        let state_node = unsafe { owner.get_node("/root/State".into()) };
+        let state_instance: Instance<game_data::State> =
+            unsafe { Instance::try_from_unsafe_base(state_node.unwrap()).unwrap() };
+        let state = state_instance.into_script();
+        state
+            .map(|state| {
+                if state.current_game.is_none() {
+                    unsafe {
+                        owner
+                            .get_node("Menu/GameControls/Continue".into())
+                            .and_then(|node| node.cast::<Button>())
+                            .map(|mut button| button.set_disabled(true))
+                    };
+                }
+            })
+            .unwrap();
     }
 
     #[export]
@@ -123,7 +150,23 @@ impl Menu {
     }
 
     #[export]
-    fn _start_game(&mut self, owner: OwnerNode) {
+    fn _continue_game(&mut self, owner: OwnerNode) {
+        unsafe {
+            owner
+                .get_tree()
+                .expect("was able to get tree from node")
+                .change_scene("res://game/Game.tscn".into())
+                .expect("was able to change scene");
+        }
+    }
+
+    #[export]
+    fn _new_game(&mut self, owner: OwnerNode) {
+        let state_node = unsafe { owner.get_node("/root/State".into()) };
+        let state_instance: Instance<game_data::State> =
+            unsafe { Instance::try_from_unsafe_base(state_node.unwrap()).unwrap() };
+        let state = state_instance.into_script();
+        state.map_mut(|state| state.current_game = None).unwrap();
         unsafe {
             owner
                 .get_tree()

@@ -6,7 +6,6 @@
     missing_copy_implementations,
     trivial_casts,
     trivial_numeric_casts,
-    unsafe_code,
     unstable_features,
     unused_import_braces,
     missing_docs
@@ -18,9 +17,11 @@ use gdnative::{FromVariant, ToVariant};
 
 mod loader;
 pub use loader::ESGameLoader;
+mod state;
+pub use state::State;
 
 /// A ship
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ship {
     /// it's name
     pub name: String,
@@ -38,7 +39,7 @@ pub struct Player {
 }
 
 /// A stellar object
-#[derive(Debug, ToVariant, FromVariant)]
+#[derive(Debug, ToVariant, FromVariant, Clone)]
 pub struct Object {
     /// it's sprite
     pub sprite: Option<String>,
@@ -51,7 +52,7 @@ pub struct Object {
 }
 
 /// A system
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct System {
     /// it's name
     pub name: String,

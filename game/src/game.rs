@@ -74,12 +74,12 @@ impl Game {
     #[export]
     fn _ready(&mut self, owner: OwnerNode) {
         let state_node = unsafe { owner.get_node("/root/State".into()) };
-        let state_instance: Instance<crate::state::State> =
+        let state_instance: Instance<game_data::State> =
             unsafe { Instance::try_from_unsafe_base(state_node.unwrap()).unwrap() };
         let state = state_instance.into_script();
         state
-            .map(|state| {
-                let game_data = &state.game;
+            .map_mut(|state: &mut game_data::State| {
+                let game_data = state.current_game_or_new();
                 let days_since_beginning = game_data.get_nb_days_elapsed_since_beginning() as f32;
                 let mut object_parent = unsafe {
                     owner

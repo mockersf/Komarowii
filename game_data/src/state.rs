@@ -1,13 +1,20 @@
 use gdnative::*;
 
+// use std::sync::{Arc, RwLock};
+
 type OwnerNode = Node;
 
 #[derive(NativeClass, Debug)]
 #[inherit(OwnerNode)]
 #[user_data(gdnative::user_data::MutexData<State>)]
 #[register_with(Self::register_properties)]
+/// State of a game
 pub struct State {
-    pub game: game_data::Game,
+    /// default state, as parsed from data files
+    pub game_data: crate::ESGameLoader,
+    /// current state, with actions made by the player
+    pub current_game: Option<crate::Game>,
+    // pub current_game: Option<Arc<RwLock<crate::Game>>>,
 }
 
 unsafe impl Send for State {}
@@ -15,7 +22,7 @@ unsafe impl Send for State {}
 #[methods]
 impl State {
     fn _init(_owner: OwnerNode) -> Self {
-        let mut es_game_data = game_data::ESGameLoader::empty();
+        let mut es_game_data = crate::ESGameLoader::empty();
 
         let mut data_dir = gdnative::Directory::new();
         data_dir.open("res://data".into()).unwrap();
@@ -37,27 +44,24 @@ impl State {
         }
         data_dir.list_dir_end();
 
-        let game_data = es_game_data.create_game().unwrap();
-        State { game: game_data }
+        State {
+            game_data: es_game_data,
+            current_game: None,
+        }
     }
 
-    fn register_properties(builder: &init::ClassBuilder<Self>) {
-        builder
-            .add_property("value")
-            .with_default(42)
-            .with_setter(State::set_value)
-            .with_getter(State::get_value)
-            .done();
+    /// zut
+    pub fn current_game_or_new(&mut self) -> &crate::Game {
+        // pub fn current_game_or_new(mut self) -> Arc<RwLock<crate::Game>> {
+        if self.current_game.is_none() {
+            self.new_game();
+        }
+        self.current_game.as_ref().unwrap()
     }
 
-    #[export]
-    fn set_value(&mut self, _owner: OwnerNode, value: i64) {
-        godot_print!("setting value to {:?}", value);
-    }
-
-    #[export]
-    fn get_value(&self, _owner: OwnerNode) -> i64 {
-        godot_print!("getting value");
-        5
+    /// create a new game from default state
+    pub fn new_game(&mut self) {
+        // self.current_game = Some(Arc::new(RwLock::new(self.game_data.create_game().unwrap())))
+        self.current_game = Some(self.game_data.create_game().unwrap())
     }
 }
