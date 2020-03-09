@@ -343,6 +343,135 @@ pub struct Ship<'a> {
     pub description: Vec<&'a str>,
 }
 
+/// An outfit
+#[derive(Debug, PartialEq, Clone, Builder)]
+pub struct Outfit<'a> {
+    /// name of the outfit
+    pub name: &'a str,
+    /// plural form of the name
+    #[builder(setter(into), default)]
+    pub plural: Option<&'a str>,
+    /// category of the ouftit
+    pub category: &'a str,
+    /// cost of the outfit
+    #[builder(default)]
+    pub cost: u32,
+    /// is the outfit unplunderable
+    #[builder(default)]
+    pub unplunderable: u32,
+    /// thumbnail of the outfit
+    #[builder(setter(into), default)]
+    pub thumbnail: Option<&'a str>,
+    /// mass of the outfit
+    #[builder(setter(into), default)]
+    pub mass: Option<f32>,
+    /// outfit space used by the outfit
+    #[builder(setter(into), default)]
+    pub outfit_space: f32,
+    /// cargo space used by the outfit
+    #[builder(setter(into), default)]
+    pub cargo_space: Option<f32>,
+    /// cooling of the outfit
+    #[builder(setter(into), default)]
+    pub cooling: Option<f32>,
+    /// cooling inefficiency of the outfit
+    #[builder(setter(into), default)]
+    pub cooling_inefficiency: Option<f32>,
+    /// heat dissipation of the outfit
+    #[builder(setter(into), default)]
+    pub heat_dissipation: Option<f32>,
+    /// shield generation of the outfit
+    #[builder(setter(into), default)]
+    pub shield_generation: Option<f32>,
+    /// shield energy of the outfit
+    #[builder(setter(into), default)]
+    pub shield_energy: Option<f32>,
+    /// energy consumption of the outfit
+    #[builder(setter(into), default)]
+    pub energy_consumption: Option<f32>,
+    /// heat generation of the outfit
+    #[builder(setter(into), default)]
+    pub heat_generation: Option<f32>,
+    /// radar jamming of the outfit
+    #[builder(setter(into), default)]
+    pub radar_jamming: Option<f32>,
+    /// ramscoop of the outfit
+    #[builder(setter(into), default)]
+    pub ramscoop: Option<f32>,
+    /// jump speed of the outfit
+    #[builder(setter(into), default)]
+    pub jump_speed: Option<f32>,
+    /// jump fuel of the outfit
+    #[builder(setter(into), default)]
+    pub jump_fuel: Option<f32>,
+    /// hyperdrive of the outfit
+    #[builder(setter(into), default)]
+    pub hyperdrive: Option<f32>,
+    /// scram drive of the outfit
+    #[builder(setter(into), default)]
+    pub scram_drive: Option<f32>,
+    /// jump drive of the outfit
+    #[builder(setter(into), default)]
+    pub jump_drive: Option<f32>,
+    /// cargo scan power of the outfit
+    #[builder(setter(into), default)]
+    pub cargo_scan_power: Option<f32>,
+    /// cargo scan speed of the outfit
+    #[builder(setter(into), default)]
+    pub cargo_scan_speed: Option<f32>,
+    /// outfit scan power of the outfit
+    #[builder(setter(into), default)]
+    pub outfit_scan_power: Option<f32>,
+    /// outfit scan speed of the outfit
+    #[builder(setter(into), default)]
+    pub outfit_scan_speed: Option<f32>,
+    /// asteroid scan power of the outfit
+    #[builder(setter(into), default)]
+    pub asteroid_scan_power: Option<f32>,
+    /// tactical scan power of the outfit
+    #[builder(setter(into), default)]
+    pub tactical_scan_power: Option<f32>,
+    /// atmosphere scan of the outfit
+    #[builder(setter(into), default)]
+    pub atmosphere_scan: Option<f32>,
+    /// cloak of the outfit
+    #[builder(setter(into), default)]
+    pub cloak: Option<f32>,
+    /// cloaking energy of the outfit
+    #[builder(setter(into), default)]
+    pub cloaking_energy: Option<f32>,
+    /// cloaking fuel of the outfit
+    #[builder(setter(into), default)]
+    pub cloaking_fuel: Option<f32>,
+    /// bunks added by the outfit
+    #[builder(setter(into), default)]
+    pub bunks: Option<f32>,
+    /// required crew for the outfit
+    #[builder(setter(into), default)]
+    pub required_crew: Option<f32>,
+    /// fuel capacity it will add to the ship
+    #[builder(setter(into), default)]
+    pub fuel_capacity: Option<f32>,
+    /// scan interference
+    #[builder(setter(into), default)]
+    pub scan_interference: Option<f32>,
+    /// capture attack
+    #[builder(setter(into), default)]
+    pub capture_attack: Option<f32>,
+    /// capture defense
+    #[builder(setter(into), default)]
+    pub capture_defense: Option<f32>,
+    /// illegal
+    #[builder(setter(into), default)]
+    pub illegal: Option<f32>,
+    /// map
+    #[builder(setter(into), default)]
+    pub map: Option<f32>,
+    /// description
+    #[builder(default)]
+    pub description: Vec<&'a str>,
+}
+
 /// list of top level objects that can be parsed
 #[allow(clippy::large_enum_variant)]
 #[derive(Debug)]
@@ -357,4 +486,6 @@ pub enum Object<'a> {
     System(System<'a>),
     /// a ship
     Ship(Ship<'a>),
+    /// an outfit
+    Outfit(Outfit<'a>),
 }

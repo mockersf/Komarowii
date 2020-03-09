@@ -24,6 +24,7 @@ mod helpers;
 use errors::DataError;
 
 mod galaxy;
+mod outfit;
 mod planet;
 mod ship;
 mod start;
@@ -52,6 +53,9 @@ pub fn validate<'a>(input: &'a str) -> IResult<&'a str, Vec<Object<'a>>, DataErr
             system::parse_system(input).map(|(input, parsed)| (input, Some(Object::System(parsed))))
         },
         |input| ship::parse_ship(input).map(|(input, parsed)| (input, Some(Object::Ship(parsed)))),
+        |input| {
+            outfit::parse_outfit(input).map(|(input, parsed)| (input, Some(Object::Outfit(parsed))))
+        },
         |input| line_ending(input).map(|(input, _)| (input, None)),
         |input| helpers::comment_hole(input).map(|(input, _)| (input, None)),
     ))))(input)
