@@ -27,6 +27,10 @@ State="*res://game/State.gdns"
 
 limits/message_queue/max_size_kb=8192
 
+[network]
+
+limits/debugger_stdout/max_chars_per_second=65536
+
 [rendering]
 
 vram_compression/import_etc=true
