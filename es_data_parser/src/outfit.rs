@@ -11,6 +11,7 @@ use crate::helpers::{indent, integer, resource_path, string};
 use crate::types::Outfit;
 use crate::DataError;
 
+#[allow(clippy::cognitive_complexity)]
 pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataError<&'a str>> {
     let (input, (_, _, name, _)) = context(
         "outfit tag",

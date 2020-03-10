@@ -140,7 +140,6 @@ impl Game {
                         ship_parent.add_child(Some(node), false);
                     }
                 }
-                ()
             })
             .unwrap();
     }
