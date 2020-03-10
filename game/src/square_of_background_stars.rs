@@ -110,7 +110,7 @@ impl SquareOfBackgroundStars {
                 .filter_map(|c| c.try_to_object::<Node2D>())
                 .filter_map(|node| node.get_node("Control/Star".into()))
                 .filter_map(|node| node.cast::<ColorRect>())
-                .for_each(|mut star_node| star_node.set_size(vec2(zoom as f32, zoom as f32)));
+                .for_each(|mut star_node| star_node.set_size(vec2(zoom as f32, zoom as f32), true));
         }
     }
 }
