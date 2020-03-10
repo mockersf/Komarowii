@@ -7,7 +7,7 @@ use nom::{
     IResult,
 };
 
-use crate::helpers::{indent, integer, resource_path, string};
+use crate::helpers::{indent, string};
 use crate::types::Effect;
 use crate::DataError;
 
