@@ -227,12 +227,12 @@ impl Game {
         let es_thrust_ratio = 3600.0;
         let es_turn_ratio = 60.0;
         let max_velocity_ratio = 0.005;
-        let turn_ratio = 0.01;
+        let turn_ratio = 0.2;
 
         let acceleration = thrust * es_thrust_ratio / mass;
         let max_velocity = thrust * es_thrust_ratio / drag * max_velocity_ratio;
 
-        let angular_speed = Angle::degrees(turn * es_turn_ratio * turn_ratio);
+        let angular_speed = Angle::degrees(turn * es_turn_ratio * turn_ratio / mass);
         let mut new_acceleration_vec: Vector2D<f32, UnknownUnit> = vec2(0.0, 0.0);
         let mut rotation = self.player.direction;
         let input = Input::godot_singleton();
@@ -246,7 +246,12 @@ impl Game {
             let current_mov_angle = self.player.speed.angle_from_x_axis() + Angle::pi();
             let target = current_mov_angle + Angle::pi();
             let turn = target - rotation;
-            rotation += turn.signed() * delta;
+            if turn.signed().get() < 0.0 {
+                rotation -= angular_speed * delta;
+            } else {
+                rotation += angular_speed * delta;
+            }
+            // rotation += turn.signed() * delta;
         }
         if input.is_action_pressed("ui_up".into()) {
             new_acceleration_vec.x -= acceleration;
