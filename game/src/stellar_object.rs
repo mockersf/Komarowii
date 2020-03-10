@@ -42,7 +42,7 @@ impl StellarObject {
     pub fn set_subobjects(
         &self,
         owner: OwnerNode,
-        objects: Vec<game_data::Object>,
+        objects: Vec<game_data::data::Object>,
         days_since_beginning: f32,
     ) {
         let mut object_parent = unsafe {

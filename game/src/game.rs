@@ -219,10 +219,21 @@ impl Game {
     }
 
     fn player_movement(&mut self, owner: OwnerNode, delta: f32) {
-        let thrust = 11.5;
-        let mass = 182.0;
-        let drag = 1.7;
-        let turn = 307.0;
+        let state_node = unsafe { owner.get_node("/root/State".into()) };
+        let state_instance: Instance<game_data::State> =
+            unsafe { Instance::try_from_unsafe_base(state_node.unwrap()).unwrap() };
+        let state = state_instance.into_script();
+        let (thrust, mass, drag, turn) = state
+            .map(|state| {
+                let player_ship = state.current_game.as_ref().unwrap().player.ship.as_ref();
+                (
+                    player_ship.get_forward_thrust(),
+                    player_ship.get_mass(),
+                    player_ship.get_drag(),
+                    player_ship.get_turn(),
+                )
+            })
+            .unwrap();
 
         let es_thrust_ratio = 3600.0;
         let es_turn_ratio = 60.0;

@@ -2,12 +2,22 @@ use std::sync::Arc;
 
 use rand::seq::IteratorRandom;
 
-use super::{Game, Object, Player, Ship, System};
+use super::data::*;
+
+/// resolved game data
+#[derive(Debug)]
+pub struct ESGameLoader {
+    outfits: Vec<Outfit>,
+    ships: Vec<Ship>,
+    systems: Vec<System>,
+    start: Option<(String, (i32, u32, u32))>,
+}
 
 /// Helper to load es data files and create a game
 #[derive(Debug)]
-pub struct ESGameLoader {
-    ships: Vec<Ship>,
+pub struct UnresolvedESGameLoader {
+    outfits: Vec<Outfit>,
+    ships: Vec<super::unresolved_data::Ship>,
     systems: Vec<System>,
     start: Option<(String, (i32, u32, u32))>,
 }
@@ -21,11 +31,41 @@ fn es_object_to_object<'a>(object: &es_data_parser::SystemObject<'a>) -> Object 
     }
 }
 
+fn outfit_as_engine(outfit: &es_data_parser::Outfit) -> Vec<OutfitEngine> {
+    let mut engines = vec![];
+    if outfit.thrust.is_some() {
+        engines.push(OutfitEngine {
+            ty: EngineType::Thrust,
+            power: outfit.thrust.unwrap_or(0.0),
+            energy_consumption: outfit.energy_consumption.unwrap_or(0.0),
+            heat_generation: outfit.heat_generation.unwrap_or(0.0),
+        })
+    }
+    if outfit.turn.is_some() {
+        engines.push(OutfitEngine {
+            ty: EngineType::Turn,
+            power: outfit.turn.unwrap_or(0.0),
+            energy_consumption: outfit.turning_energy.unwrap_or(0.0),
+            heat_generation: outfit.turning_heat.unwrap_or(0.0),
+        })
+    }
+    if outfit.reverse_thrust.is_some() {
+        engines.push(OutfitEngine {
+            ty: EngineType::ReverseThrust,
+            power: outfit.reverse_thrust.unwrap_or(0.0),
+            energy_consumption: outfit.reverse_thrusting_energy.unwrap_or(0.0),
+            heat_generation: outfit.reverse_thrusting_heat.unwrap_or(0.0),
+        })
+    }
+    engines
+}
+
 #[allow(clippy::new_without_default)]
-impl ESGameLoader {
+impl<'a> UnresolvedESGameLoader {
     /// Start an empty es game loader
     pub fn empty() -> Self {
         Self {
+            outfits: vec![],
             ships: vec![],
             systems: vec![],
             start: None,
@@ -36,6 +76,29 @@ impl ESGameLoader {
     pub fn load(&mut self, es_game_data_source: &str) {
         let es_game_data = es_data_parser::parse(es_game_data_source);
 
+        let mut outfits = es_game_data
+            .iter()
+            .filter_map(|object| {
+                if let es_data_parser::Object::Outfit(outfit) = object {
+                    Some(outfit)
+                } else {
+                    None
+                }
+            })
+            .map(|outfit| Outfit {
+                name: String::from(outfit.name),
+                category: match outfit.category {
+                    "Systems" => OutfitCategory::Systems,
+                    "Hand to Hand" => OutfitCategory::HandToHand,
+                    "Engines" => OutfitCategory::Engines,
+                    _ => OutfitCategory::Unspecified,
+                },
+                mass: outfit.mass as i32,
+                engine: outfit_as_engine(outfit),
+            })
+            .collect::<Vec<_>>();
+        self.outfits.append(&mut outfits);
+
         let mut ships = es_game_data
             .iter()
             .filter_map(|object| {
@@ -45,12 +108,19 @@ impl ESGameLoader {
                     None
                 }
             })
-            .map(|ship| Ship {
+            .map(|ship| super::unresolved_data::Ship {
                 name: String::from(ship.name),
                 sprite: match ship.sprite {
                     es_data_parser::Sprite::Simple(sprite) => String::from(sprite),
                     es_data_parser::Sprite::Sprite { name, .. } => format!("{}=0", name),
                 },
+                outfits: ship
+                    .outfits
+                    .iter()
+                    .map(|outfit| outfit.0.to_string())
+                    .collect(),
+                drag: ship.attributes.drag,
+                mass: ship.attributes.mass,
             })
             .collect::<Vec<_>>();
         self.ships.append(&mut ships);
@@ -89,8 +159,38 @@ impl ESGameLoader {
         }
     }
 
+    pub fn resolve(self) -> ESGameLoader {
+        let outfits = self.outfits;
+        let ships = self
+            .ships
+            .into_iter()
+            .map(|ship| Ship {
+                name: ship.name,
+                sprite: ship.sprite,
+                drag: ship.drag,
+                base_mass: ship.mass,
+                outfits: ship
+                    .outfits
+                    .into_iter()
+                    .filter_map(|outfit_name| {
+                        outfits.iter().find(|outfit| outfit.name == outfit_name)
+                    })
+                    .cloned()
+                    .collect(),
+            })
+            .collect();
+        ESGameLoader {
+            outfits,
+            systems: self.systems,
+            start: self.start,
+            ships,
+        }
+    }
+}
+
+impl ESGameLoader {
     /// Create a game from the loaded files
-    pub fn create_game(&self) -> Result<Game, ()> {
+    pub fn create_game(&self) -> Result<super::Game, ()> {
         let mut rng = rand::thread_rng();
 
         if self.ships.is_empty() {
@@ -121,7 +221,7 @@ impl ESGameLoader {
         };
         let start_ship = ships.iter().choose(&mut rng).ok_or(())?.clone();
 
-        Ok(Game {
+        Ok(super::Game {
             current_date: start_date,
             ships,
             systems,
