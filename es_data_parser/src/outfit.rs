@@ -7,7 +7,7 @@ use nom::{
     IResult,
 };
 
-use crate::helpers::{indent, integer, resource_path, string};
+use crate::helpers::{indent, integer, integer_u32, resource_path, string};
 use crate::types::Outfit;
 use crate::DataError;
 
@@ -36,7 +36,7 @@ pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataErro
             builder
         );
         crate::parse_item_in_loop!(1, thumbnail, resource_path, input, builder);
-        crate::parse_item_in_loop!(1, mass, "\"mass\"", float, input, builder);
+        crate::parse_item_in_loop!(1, mass, "\"mass\"", integer, input, builder);
         crate::parse_item_in_loop!(1, outfit_space, "\"outfit space\"", float, input, builder);
         crate::parse_item_in_loop!(1, cargo_space, "\"cargo space\"", float, input, builder);
         crate::parse_item_in_loop!(1, cooling, "\"cooling\"", float, input, builder);
@@ -287,6 +287,30 @@ pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataErro
             1,
             reverse_thrusting_heat,
             "\"reverse thrusting heat\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            energy_capacity,
+            "\"energy capacity\"",
+            integer_u32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            solar_collection,
+            "\"solar collection\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            energy_generation,
+            "\"energy generation\"",
             float,
             input,
             builder

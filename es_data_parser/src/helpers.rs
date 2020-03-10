@@ -72,6 +72,10 @@ where
     context("integer", digit1)(input).map(|(input, value)| (input, value.parse::<T>().unwrap()))
 }
 
+pub fn integer_u32<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, u32, E> {
+    context("integer", digit1)(input).map(|(input, value)| (input, value.parse::<u32>().unwrap()))
+}
+
 pub fn comment_hole<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, (), E> {
     context(
         "comment to ignore",

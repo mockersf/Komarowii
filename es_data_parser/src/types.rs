@@ -367,8 +367,8 @@ pub struct Outfit<'a> {
     #[builder(setter(into), default)]
     pub thumbnail: Option<&'a str>,
     /// mass of the outfit
-    #[builder(setter(into), default)]
-    pub mass: Option<f32>,
+    #[builder(default)]
+    pub mass: u32,
     /// outfit space used by the outfit
     #[builder(setter(into), default)]
     pub outfit_space: f32,
@@ -519,6 +519,15 @@ pub struct Outfit<'a> {
     /// reverse thrusting heat generation
     #[builder(setter(into), default)]
     pub reverse_thrusting_heat: Option<f32>,
+    /// energy capacity
+    #[builder(setter(into), default)]
+    pub energy_capacity: Option<u32>,
+    /// solar collection
+    #[builder(setter(into), default)]
+    pub solar_collection: Option<f32>,
+    /// energy generation
+    #[builder(setter(into), default)]
+    pub energy_generation: Option<f32>,
     /// flare sprite
     #[builder(setter(into), default)]
     pub flare_sprite: Option<Sprite<'a>>,
