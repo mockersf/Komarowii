@@ -289,11 +289,15 @@ pub enum Sprite<'a> {
         /// name of the sprite
         name: &'a str,
         /// (?)
-        frame_time: u32,
+        frame_time: Option<u32>,
         /// (?)
-        delay: u32,
+        delay: Option<u32>,
         /// (?)
         random_start_frame: bool,
+        /// (?)
+        no_repeat: bool,
+        /// (?)
+        frame_rate: Option<f32>,
     },
     /// Simple sprite
     Simple(&'a str),
@@ -467,9 +471,90 @@ pub struct Outfit<'a> {
     /// map
     #[builder(setter(into), default)]
     pub map: Option<f32>,
+    /// weapon capacity
+    #[builder(setter(into), default)]
+    pub weapon_capacity: Option<f32>,
+    /// engine capacity
+    #[builder(setter(into), default)]
+    pub engine_capacity: Option<f32>,
+    /// afterburner thrust
+    #[builder(setter(into), default)]
+    pub afterburner_thrust: Option<f32>,
+    /// afterburner fuel
+    #[builder(setter(into), default)]
+    pub afterburner_fuel: Option<f32>,
+    /// afterburner energy
+    #[builder(setter(into), default)]
+    pub afterburner_energy: Option<f32>,
+    /// afterburner heat
+    #[builder(setter(into), default)]
+    pub afterburner_heat: Option<f32>,
+    /// afterburner effect
+    #[builder(setter(into), default)]
+    pub afterburner_effect: Option<&'a str>,
+    /// turn power
+    #[builder(setter(into), default)]
+    pub turn: Option<f32>,
+    /// turning energy consumption
+    #[builder(setter(into), default)]
+    pub turning_energy: Option<f32>,
+    /// thurning heat production
+    #[builder(setter(into), default)]
+    pub turning_heat: Option<f32>,
+    /// thrust power
+    #[builder(setter(into), default)]
+    pub thrust: Option<f32>,
+    /// thrusting energy consumption
+    #[builder(setter(into), default)]
+    pub thrusting_energy: Option<f32>,
+    /// thrusting heat generation
+    #[builder(setter(into), default)]
+    pub thrusting_heat: Option<f32>,
+    /// reverse thrust power
+    #[builder(setter(into), default)]
+    pub reverse_thrust: Option<f32>,
+    /// reverse thrusting energy consumption
+    #[builder(setter(into), default)]
+    pub reverse_thrusting_energy: Option<f32>,
+    /// reverse thrusting heat generation
+    #[builder(setter(into), default)]
+    pub reverse_thrusting_heat: Option<f32>,
+    /// flare sprite
+    #[builder(setter(into), default)]
+    pub flare_sprite: Option<Sprite<'a>>,
+    /// flare sound
+    #[builder(setter(into), default)]
+    pub flare_sound: Option<&'a str>,
     /// description
     #[builder(default)]
     pub description: Vec<&'a str>,
+}
+
+/// An effect
+#[derive(Debug, PartialEq, Clone, Builder)]
+pub struct Effect<'a> {
+    /// name of the outfit
+    pub name: &'a str,
+    /// sprite of the effect
+    pub sprite: Sprite<'a>,
+    /// sound of the effect
+    #[builder(setter(into), default)]
+    sound: Option<&'a str>,
+    /// lifetime of the effect
+    #[builder(setter(into), default)]
+    lifetime: Option<f32>,
+    /// angle of the effect
+    #[builder(setter(into), default)]
+    random_angle: Option<f32>,
+    /// spin of the effect
+    #[builder(setter(into), default)]
+    random_spin: Option<f32>,
+    /// velocity of the effect
+    #[builder(setter(into), default)]
+    random_velocity: Option<f32>,
+    /// scale of the effect
+    #[builder(setter(into), default)]
+    velocity_scale: Option<f32>,
 }
 
 /// list of top level objects that can be parsed
@@ -488,4 +573,6 @@ pub enum Object<'a> {
     Ship(Ship<'a>),
     /// an outfit
     Outfit(Outfit<'a>),
+    /// an effect
+    Effect(Effect<'a>),
 }

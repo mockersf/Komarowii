@@ -24,6 +24,7 @@ pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataErro
         crate::parse_item_in_loop!(1, plural, string, input, builder);
         crate::parse_item_in_loop!(1, category, string, input, builder);
         crate::parse_item_in_loop!(1, cost, integer, input, builder);
+        crate::parse_item_in_loop!(1, cost, "\"cost\"", integer, input, builder);
         crate::parse_item_in_loop!(1, unplunderable, integer, input, builder);
         crate::parse_item_in_loop!(
             1,
@@ -181,16 +182,137 @@ pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataErro
         );
         crate::parse_item_in_loop!(1, illegal, "\"illegal\"", float, input, builder);
         crate::parse_item_in_loop!(1, map, "\"map\"", float, input, builder);
+        crate::parse_item_in_loop!(
+            1,
+            weapon_capacity,
+            "\"weapon capacity\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            engine_capacity,
+            "\"engine capacity\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            afterburner_thrust,
+            "\"afterburner thrust\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            afterburner_fuel,
+            "\"afterburner fuel\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            afterburner_energy,
+            "\"afterburner energy\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            afterburner_heat,
+            "\"afterburner heat\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            afterburner_effect,
+            "\"afterburner effect\"",
+            string,
+            input,
+            builder
+        );
+
+        crate::parse_item_in_loop!(1, turn, "\"turn\"", float, input, builder);
+        crate::parse_item_in_loop!(
+            1,
+            turning_energy,
+            "\"turning energy\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(1, turning_heat, "\"turning heat\"", float, input, builder);
+        crate::parse_item_in_loop!(1, thrust, "\"thrust\"", float, input, builder);
+        crate::parse_item_in_loop!(
+            1,
+            thrusting_energy,
+            "\"thrusting energy\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            thrusting_heat,
+            "\"thrusting heat\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            reverse_thrust,
+            "\"reverse thrust\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            reverse_thrusting_energy,
+            "\"reverse thrusting energy\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            reverse_thrusting_heat,
+            "\"reverse thrusting heat\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            flare_sprite,
+            "\"flare sprite\"",
+            crate::ship::parse_sprite,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(1, flare_sound, "\"flare sound\"", string, input, builder);
+
         crate::parse_items_in_loop!(1, description, string, input, builder);
 
         break;
     }
 
-    builder.build().map(|ship| (input, ship)).map_err(|error| {
-        nom::Err::Failure(DataError::DataBuilderError {
-            input,
-            error,
-            data_type: String::from("outfit"),
+    builder
+        .build()
+        .map(|outfit| (input, outfit))
+        .map_err(|error| {
+            nom::Err::Failure(DataError::DataBuilderError {
+                input,
+                error,
+                data_type: String::from("outfit"),
+            })
         })
-    })
 }

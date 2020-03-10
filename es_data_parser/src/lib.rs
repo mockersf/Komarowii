@@ -23,6 +23,7 @@ mod errors;
 mod helpers;
 use errors::DataError;
 
+mod effect;
 mod galaxy;
 mod outfit;
 mod planet;
@@ -55,6 +56,9 @@ pub fn validate<'a>(input: &'a str) -> IResult<&'a str, Vec<Object<'a>>, DataErr
         |input| ship::parse_ship(input).map(|(input, parsed)| (input, Some(Object::Ship(parsed)))),
         |input| {
             outfit::parse_outfit(input).map(|(input, parsed)| (input, Some(Object::Outfit(parsed))))
+        },
+        |input| {
+            effect::parse_effect(input).map(|(input, parsed)| (input, Some(Object::Effect(parsed))))
         },
         |input| line_ending(input).map(|(input, _)| (input, None)),
         |input| helpers::comment_hole(input).map(|(input, _)| (input, None)),
