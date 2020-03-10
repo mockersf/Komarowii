@@ -58,3 +58,30 @@ pub fn parse_effect<'a>(input: &'a str) -> IResult<&'a str, Effect<'a>, DataErro
         })
 }
 
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn can_parse_effect() {
+        let data = r#"effect "power up"
+    sprite "effect/power_up"
+        "no repeat"
+        "frame rate" 50
+    sound "power_up"
+    "lifetime" 10
+    "random angle" 10
+    "random spin" 10
+    "random velocity" 1.
+    "velocity scale" 1.
+"#;
+
+        let parsed = dbg!(parse_effect(&data));
+        assert!(parsed.is_ok());
+        let result = parsed.unwrap();
+        assert_eq!(result.0, "");
+
+        let effect = result.1;
+        assert_eq!(effect.name, "power up");
+    }
+}

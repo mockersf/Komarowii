@@ -317,3 +317,38 @@ pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataErro
             })
         })
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn can_parse_outfit() {
+        let data = r#"outfit "My Little Engine"
+    category "Engines"
+    "cost" 20000
+    thumbnail "outfit/little engines"
+    "mass" 20
+    "outfit space" -20
+    "engine capacity" -20
+    "turn" 100
+    "turning energy" .2
+    "turning heat" .5
+    "thrust" 4.0
+    "thrusting energy" .5
+    "thrusting heat" .5
+    "flare sprite" "effect/flare/v"
+        "frame rate" 1.2
+    "flare sound" "little"
+    description `It's a little engine that could`
+"#;
+
+        let parsed = dbg!(parse_outfit(&data));
+        assert!(parsed.is_ok());
+        let result = parsed.unwrap();
+        assert_eq!(result.0, "");
+
+        let engine = result.1;
+        assert_eq!(engine.name, "My Little Engine");
+    }
+}
