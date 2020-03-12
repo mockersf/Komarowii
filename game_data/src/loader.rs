@@ -103,7 +103,7 @@ impl<'a> UnresolvedESGameLoader {
                     // }
                     _ => OutfitCategory::Unspecified,
                 },
-                mass: outfit.mass as i32,
+                mass: outfit.mass,
                 engine: outfit_as_engine(outfit),
             })
             .collect::<Vec<_>>();

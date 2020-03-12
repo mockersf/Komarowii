@@ -10,7 +10,7 @@ pub struct Outfit {
     /// it's name
     pub name: String,
     /// it's mass
-    pub mass: i32,
+    pub mass: f32,
     /// it's category
     pub category: OutfitCategory,
     /// does this outfit has engine properties
@@ -90,11 +90,7 @@ impl Ship {
     /// get mass of the ship plus it's outfits
     pub fn get_mass(&self) -> f32 {
         let mut total_mass: f32 = self.base_mass as f32;
-        total_mass += self
-            .outfits
-            .iter()
-            .map(|outfit| outfit.mass as f32)
-            .sum::<f32>();
+        total_mass += self.outfits.iter().map(|outfit| outfit.mass).sum::<f32>();
         max!(total_mass, 0.0)
     }
 
