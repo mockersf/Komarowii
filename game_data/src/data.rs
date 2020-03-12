@@ -50,6 +50,18 @@ pub enum OutfitCategory {
     HandToHand,
     /// outfits that help a ship move
     Engines,
+    /// weapon ammunition
+    Ammunition,
+    /// guns
+    Guns,
+    /// outfits that provides power to a ship
+    Power,
+    /// secondary weapons
+    SecondaryWeapons,
+    /// special outfits
+    Special,
+    /// turrets
+    Turrets,
     /// no specific category
     Unspecified,
 }

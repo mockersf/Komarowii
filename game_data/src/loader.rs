@@ -91,6 +91,16 @@ impl<'a> UnresolvedESGameLoader {
                     Some("Systems") => OutfitCategory::Systems,
                     Some("Hand to Hand") => OutfitCategory::HandToHand,
                     Some("Engines") => OutfitCategory::Engines,
+                    Some("Ammunition") => OutfitCategory::Ammunition,
+                    Some("Guns") => OutfitCategory::Guns,
+                    Some("Power") => OutfitCategory::Power,
+                    Some("Secondary Weapons") => OutfitCategory::SecondaryWeapons,
+                    Some("Special") => OutfitCategory::Special,
+                    Some("Turrets") => OutfitCategory::Turrets,
+                    // Some(v) => {
+                    //     gdnative::godot_print!("category: {:?}", v);
+                    //     OutfitCategory::Unspecified
+                    // }
                     _ => OutfitCategory::Unspecified,
                 },
                 mass: outfit.mass as i32,
