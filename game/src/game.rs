@@ -238,9 +238,10 @@ impl Game {
         let es_thrust_ratio = 3600.0;
         let es_turn_ratio = 60.0;
         let max_velocity_ratio = 0.005;
+        let acceleration_ratio = 0.1;
         let turn_ratio = 0.5;
 
-        let acceleration = thrust * es_thrust_ratio / mass;
+        let acceleration = thrust * es_thrust_ratio / mass * acceleration_ratio;
         let max_velocity = thrust * es_thrust_ratio / drag * max_velocity_ratio;
 
         let angular_speed = Angle::degrees(turn * es_turn_ratio * turn_ratio / mass);
