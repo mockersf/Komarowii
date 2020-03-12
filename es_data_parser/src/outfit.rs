@@ -1,14 +1,16 @@
 use nom::{
     bytes::complete::tag,
     character::complete::{line_ending, space1},
+    combinator::opt,
     error::context,
+    multi::separated_list,
     number::complete::float,
-    sequence::tuple,
+    sequence::{preceded, tuple},
     IResult,
 };
 
-use crate::helpers::{indent, integer, integer_u32, resource_path, string};
-use crate::types::Outfit;
+use crate::helpers::{indent, integer, integer_i32, integer_u32, resource_path, string};
+use crate::types::{Outfit, Weapon};
 use crate::DataError;
 
 #[allow(clippy::cognitive_complexity)]
@@ -36,7 +38,7 @@ pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataErro
             builder
         );
         crate::parse_item_in_loop!(1, thumbnail, resource_path, input, builder);
-        crate::parse_item_in_loop!(1, mass, "\"mass\"", integer, input, builder);
+        crate::parse_item_in_loop!(1, mass, "\"mass\"", float, input, builder);
         crate::parse_item_in_loop!(1, outfit_space, "\"outfit space\"", float, input, builder);
         crate::parse_item_in_loop!(1, cargo_space, "\"cargo space\"", float, input, builder);
         crate::parse_item_in_loop!(1, cooling, "\"cooling\"", float, input, builder);
@@ -319,11 +321,78 @@ pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataErro
             1,
             flare_sprite,
             "\"flare sprite\"",
-            crate::ship::parse_sprite,
+            |input| crate::ship::parse_sprite(0, input),
             input,
             builder
         );
         crate::parse_item_in_loop!(1, flare_sound, "\"flare sound\"", string, input, builder);
+        crate::parse_item_in_loop!(1, gun_ports, "\"gun ports\"", float, input, builder);
+        crate::parse_item_in_loop!(
+            1,
+            turret_mounts,
+            "\"turret mounts\"",
+            integer_i32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(1, weapon, parse_weapon, input, builder);
+        crate::parse_item_in_loop!(1, ammo, string, input, builder);
+        crate::parse_item_in_loop!(
+            1,
+            gatling_round_capacity,
+            "\"gatling round capacity\"",
+            integer_i32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            javelin_capacity,
+            "\"javelin capacity\"",
+            integer_i32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            meteor_capacity,
+            "\"meteor capacity\"",
+            integer_i32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            rocket_capacity,
+            "\"rocket capacity\"",
+            integer_i32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            sidewinder_capacity,
+            "\"sidewinder capacity\"",
+            integer_i32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            torpedo_capacity,
+            "\"torpedo capacity\"",
+            integer_i32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            1,
+            typhoon_capacity,
+            "\"typhoon capacity\"",
+            integer_i32,
+            input,
+            builder
+        );
 
         crate::parse_items_in_loop!(1, description, string, input, builder);
 
@@ -338,6 +407,187 @@ pub fn parse_outfit<'a>(input: &'a str) -> IResult<&'a str, Outfit<'a>, DataErro
                 input,
                 error,
                 data_type: String::from("outfit"),
+            })
+        })
+}
+
+#[allow(clippy::cognitive_complexity)]
+pub fn parse_weapon<'a>(input: &'a str) -> IResult<&'a str, Weapon<'a>, DataError<&'a str>> {
+    let (input, _) = line_ending(input)?;
+
+    let mut builder = crate::types::WeaponBuilder::default();
+    let mut input = input;
+    loop {
+        crate::parse_item_in_loop!(
+            2,
+            sprite,
+            |input| crate::ship::parse_sprite(1, input),
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            hardpoint_sprite,
+            "\"hardpoint sprite\"",
+            |input| crate::ship::parse_sprite(1, input),
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            hardpoint_offset,
+            "\"hardpoint offset\"",
+            separated_list(space1, float),
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(2, sound, string, input, builder);
+        crate::parse_item_in_loop!(2, ammo, string, input, builder);
+        crate::parse_item_in_loop!(2, icon, resource_path, input, builder);
+        crate::parse_item_in_loop!(
+            2,
+            hit_effect,
+            "\"hit effect\"",
+            tuple((string, opt(preceded(space1, integer_i32)))),
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            fire_effect,
+            "\"fire effect\"",
+            tuple((string, opt(preceded(space1, integer_i32)))),
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            die_effect,
+            "\"die effect\"",
+            tuple((string, opt(preceded(space1, integer_i32)))),
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            submunition,
+            "\"submunition\"",
+            tuple((string, opt(preceded(space1, integer_i32)))),
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(2, anti_missile, "\"anti-missile\"", float, input, builder);
+        crate::parse_item_in_loop!(2, inaccuracy, "\"inaccuracy\"", float, input, builder);
+        crate::parse_item_in_loop!(2, turret_turn, "\"turret turn\"", float, input, builder);
+        crate::parse_item_in_loop!(2, velocity, "\"velocity\"", float, input, builder);
+        crate::parse_item_in_loop!(2, lifetime, "\"lifetime\"", float, input, builder);
+        crate::parse_item_in_loop!(
+            2,
+            random_velocity,
+            "\"random velocity\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            random_lifetime,
+            "\"random lifetime\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(2, reload, "\"reload\"", float, input, builder);
+        crate::parse_item_in_loop!(2, firing_energy, "\"firing energy\"", float, input, builder);
+        crate::parse_item_in_loop!(2, firing_force, "\"firing force\"", float, input, builder);
+        crate::parse_item_in_loop!(2, firing_fuel, "\"firing fuel\"", float, input, builder);
+        crate::parse_item_in_loop!(2, firing_heat, "\"firing heat\"", float, input, builder);
+        crate::parse_item_in_loop!(2, hit_force, "\"hit force\"", float, input, builder);
+        crate::parse_item_in_loop!(2, shield_damage, "\"shield damage\"", float, input, builder);
+        crate::parse_item_in_loop!(2, hull_damage, "\"hull damage\"", float, input, builder);
+        crate::parse_item_in_loop!(2, heat_damage, "\"heat damage\"", float, input, builder);
+        crate::parse_item_in_loop!(2, acceleration, "\"acceleration\"", float, input, builder);
+        crate::parse_item_in_loop!(2, drag, "\"drag\"", float, input, builder);
+        crate::parse_item_in_loop!(2, turn, "\"turn\"", float, input, builder);
+        crate::parse_item_in_loop!(2, homing, "\"homing\"", float, input, builder);
+        crate::parse_item_in_loop!(
+            2,
+            infrared_tracking,
+            "\"infrared tracking\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            radar_tracking,
+            "\"radar tracking\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            optical_tracking,
+            "\"optical tracking\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            trigger_radius,
+            "\"trigger radius\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(2, blast_radius, "\"blast radius\"", float, input, builder);
+        crate::parse_item_in_loop!(
+            2,
+            missile_strength,
+            "\"missile strength\"",
+            float,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(2, stream, |input| Ok((input, true)), input, builder);
+        crate::parse_item_in_loop!(
+            2,
+            cluster,
+            "\"cluster\"",
+            |input| Ok((input, true)),
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            burst_count,
+            "\"burst count\"",
+            integer_u32,
+            input,
+            builder
+        );
+        crate::parse_item_in_loop!(
+            2,
+            burst_reload,
+            "\"burst reload\"",
+            integer_u32,
+            input,
+            builder
+        );
+
+        break;
+    }
+
+    builder
+        .build()
+        .map(|effect| (input, effect))
+        .map_err(|error| {
+            nom::Err::Failure(DataError::DataBuilderError {
+                input,
+                error,
+                data_type: String::from("weapon"),
             })
         })
 }

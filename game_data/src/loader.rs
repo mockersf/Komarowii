@@ -88,9 +88,9 @@ impl<'a> UnresolvedESGameLoader {
             .map(|outfit| Outfit {
                 name: String::from(outfit.name),
                 category: match outfit.category {
-                    "Systems" => OutfitCategory::Systems,
-                    "Hand to Hand" => OutfitCategory::HandToHand,
-                    "Engines" => OutfitCategory::Engines,
+                    Some("Systems") => OutfitCategory::Systems,
+                    Some("Hand to Hand") => OutfitCategory::HandToHand,
+                    Some("Engines") => OutfitCategory::Engines,
                     _ => OutfitCategory::Unspecified,
                 },
                 mass: outfit.mass as i32,

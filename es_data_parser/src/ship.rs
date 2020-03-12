@@ -31,7 +31,7 @@ pub fn parse_ship<'a>(input: &'a str) -> IResult<&'a str, Ship<'a>, DataError<&'
     let mut input = input;
     loop {
         crate::parse_item_in_loop!(1, plural, string, input, builder);
-        crate::parse_item_in_loop!(1, sprite, parse_sprite, input, builder);
+        crate::parse_item_in_loop!(1, sprite, |input| parse_sprite(0, input), input, builder);
         crate::parse_item_in_loop!(1, thumbnail, resource_path, input, builder);
         crate::parse_item_in_loop!(1, attributes, parse_ship_attributes, input, builder);
         crate::parse_item_in_loop!(1, outfits, parse_outfits, input, builder);
@@ -127,32 +127,58 @@ pub fn parse_ship<'a>(input: &'a str) -> IResult<&'a str, Ship<'a>, DataError<&'
     })
 }
 
-pub fn parse_sprite<'a>(input: &'a str) -> IResult<&'a str, Sprite<'a>, DataError<&'a str>> {
+pub fn parse_sprite<'a>(
+    indent_level: usize,
+    input: &'a str,
+) -> IResult<&'a str, Sprite<'a>, DataError<&'a str>> {
     let (input, name) = context("sprite", resource_path)(input)?;
 
     let peeked: IResult<_, _, (&str, nom::error::ErrorKind)> =
-        peek(tuple((line_ending, count(indent, 2))))(input);
+        peek(tuple((line_ending, count(indent, indent_level + 2))))(input);
 
     if peeked.is_ok() {
         let (input, frame_time) = opt(preceded(
-            tuple((line_ending, count(indent, 2), tag("\"frame time\""), space1)),
+            tuple((
+                line_ending,
+                count(indent, indent_level + 2),
+                tag("\"frame time\""),
+                space1,
+            )),
             integer,
         ))(input)?;
         let (input, delay) = opt(preceded(
-            tuple((line_ending, count(indent, 2), tag("\"delay\""), space1)),
+            tuple((
+                line_ending,
+                count(indent, indent_level + 2),
+                tag("\"delay\""),
+                space1,
+            )),
             integer,
         ))(input)?;
         let (input, random_start_frame) = opt(preceded(
-            tuple((line_ending, count(indent, 2))),
+            tuple((line_ending, count(indent, indent_level + 2))),
             tag("\"random start frame\""),
         ))(input)?;
         let (input, no_repeat) = opt(preceded(
-            tuple((line_ending, count(indent, 2))),
+            tuple((line_ending, count(indent, indent_level + 2))),
             tag("\"no repeat\""),
         ))(input)?;
         let (input, frame_rate) = opt(preceded(
-            tuple((line_ending, count(indent, 2), tag("\"frame rate\""), space1)),
+            tuple((
+                line_ending,
+                count(indent, indent_level + 2),
+                tag("\"frame rate\""),
+                space1,
+            )),
             float,
+        ))(input)?;
+        let (input, random_start_frame_2) = opt(preceded(
+            tuple((line_ending, count(indent, indent_level + 2))),
+            tag("\"random start frame\""),
+        ))(input)?;
+        let (input, no_repeat_2) = opt(preceded(
+            tuple((line_ending, count(indent, indent_level + 2))),
+            tag("\"no repeat\""),
         ))(input)?;
 
         let (input, _) = line_ending(input)?;
@@ -163,8 +189,8 @@ pub fn parse_sprite<'a>(input: &'a str) -> IResult<&'a str, Sprite<'a>, DataErro
                 name,
                 frame_time,
                 delay,
-                random_start_frame: random_start_frame.is_some(),
-                no_repeat: no_repeat.is_some(),
+                random_start_frame: random_start_frame.is_some() || random_start_frame_2.is_some(),
+                no_repeat: no_repeat.is_some() || no_repeat_2.is_some(),
                 frame_rate,
             },
         ))

@@ -21,11 +21,25 @@ pub fn parse_effect<'a>(input: &'a str) -> IResult<&'a str, Effect<'a>, DataErro
     builder.name(name);
     let mut input = input;
     loop {
-        crate::parse_item_in_loop!(1, sprite, crate::ship::parse_sprite, input, builder);
+        crate::parse_item_in_loop!(
+            1,
+            sprite,
+            |input| crate::ship::parse_sprite(0, input),
+            input,
+            builder
+        );
         crate::parse_item_in_loop!(1, sound, string, input, builder);
         crate::parse_item_in_loop!(1, lifetime, "\"lifetime\"", float, input, builder);
         crate::parse_item_in_loop!(1, random_angle, "\"random angle\"", float, input, builder);
         crate::parse_item_in_loop!(1, random_spin, "\"random spin\"", float, input, builder);
+        crate::parse_item_in_loop!(
+            1,
+            random_frame_rate,
+            "\"random frame rate\"",
+            float,
+            input,
+            builder
+        );
         crate::parse_item_in_loop!(
             1,
             random_velocity,

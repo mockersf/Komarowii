@@ -356,7 +356,8 @@ pub struct Outfit<'a> {
     #[builder(setter(into), default)]
     pub plural: Option<&'a str>,
     /// category of the ouftit
-    pub category: &'a str,
+    #[builder(setter(into), default)]
+    pub category: Option<&'a str>,
     /// cost of the outfit
     #[builder(default)]
     pub cost: u32,
@@ -368,7 +369,7 @@ pub struct Outfit<'a> {
     pub thumbnail: Option<&'a str>,
     /// mass of the outfit
     #[builder(default)]
-    pub mass: u32,
+    pub mass: f32,
     /// outfit space used by the outfit
     #[builder(setter(into), default)]
     pub outfit_space: f32,
@@ -534,9 +535,167 @@ pub struct Outfit<'a> {
     /// flare sound
     #[builder(setter(into), default)]
     pub flare_sound: Option<&'a str>,
+    /// gun ports provided / occupied
+    #[builder(setter(into), default)]
+    pub gun_ports: Option<f32>,
+    /// turret mounts provided / occupied
+    #[builder(setter(into), default)]
+    pub turret_mounts: Option<i32>,
+    /// weapon details
+    #[builder(setter(into), default)]
+    pub weapon: Option<Weapon<'a>>,
+    /// ammo it can contains
+    #[builder(setter(into), default)]
+    pub ammo: Option<&'a str>,
+    /// gatling round capacity
+    #[builder(setter(into), default)]
+    pub gatling_round_capacity: Option<i32>,
+    /// javelin capacity
+    #[builder(setter(into), default)]
+    pub javelin_capacity: Option<i32>,
+    /// meteor capacity
+    #[builder(setter(into), default)]
+    pub meteor_capacity: Option<i32>,
+    /// rocket capacity
+    #[builder(setter(into), default)]
+    pub rocket_capacity: Option<i32>,
+    /// sidewinder capacity
+    #[builder(setter(into), default)]
+    pub sidewinder_capacity: Option<i32>,
+    /// torpedo capacity
+    #[builder(setter(into), default)]
+    pub torpedo_capacity: Option<i32>,
+    /// typhoon capacity
+    #[builder(setter(into), default)]
+    pub typhoon_capacity: Option<i32>,
     /// description
     #[builder(default)]
     pub description: Vec<&'a str>,
+}
+
+/// A weapon
+#[derive(Debug, PartialEq, Clone, Builder)]
+pub struct Weapon<'a> {
+    /// sprite of the weapon
+    #[builder(setter(into), default)]
+    pub sprite: Option<Sprite<'a>>,
+    /// hardpoint (?) sprite of the weapon
+    #[builder(setter(into), default)]
+    pub hardpoint_sprite: Option<Sprite<'a>>,
+    /// hardpoint offset
+    #[builder(setter(into), default)]
+    hardpoint_offset: Option<Vec<f32>>,
+    /// sound of the weapon
+    #[builder(setter(into), default)]
+    sound: Option<&'a str>,
+    /// ammo used by the weapon
+    #[builder(setter(into), default)]
+    ammo: Option<&'a str>,
+    /// icon
+    #[builder(setter(into), default)]
+    pub icon: Option<&'a str>,
+    /// hit effect of the weapon
+    #[builder(setter(into), default)]
+    hit_effect: Option<(&'a str, Option<i32>)>,
+    /// fire effect of the weapon
+    #[builder(setter(into), default)]
+    fire_effect: Option<(&'a str, Option<i32>)>,
+    /// die effect of the weapon
+    #[builder(setter(into), default)]
+    die_effect: Option<(&'a str, Option<i32>)>,
+    /// submunition of the weapon
+    #[builder(setter(into), default)]
+    submunition: Option<(&'a str, Option<i32>)>,
+    /// anti-missile
+    #[builder(setter(into), default)]
+    anti_missile: Option<f32>,
+    /// inaccuracy
+    #[builder(setter(into), default)]
+    inaccuracy: Option<f32>,
+    /// turret turn
+    #[builder(setter(into), default)]
+    turret_turn: Option<f32>,
+    /// velocity
+    #[builder(setter(into), default)]
+    velocity: Option<f32>,
+    /// lifetime
+    #[builder(setter(into), default)]
+    lifetime: Option<f32>,
+    /// random velocity
+    #[builder(setter(into), default)]
+    random_velocity: Option<f32>,
+    /// random lifetime
+    #[builder(setter(into), default)]
+    random_lifetime: Option<f32>,
+    /// firing energy
+    #[builder(setter(into), default)]
+    reload: Option<f32>,
+    /// firing energy
+    #[builder(setter(into), default)]
+    firing_energy: Option<f32>,
+    /// firing force
+    #[builder(setter(into), default)]
+    firing_force: Option<f32>,
+    /// firing fuel
+    #[builder(setter(into), default)]
+    firing_fuel: Option<f32>,
+    /// firing heat
+    #[builder(setter(into), default)]
+    firing_heat: Option<f32>,
+    /// hit force
+    #[builder(setter(into), default)]
+    hit_force: Option<f32>,
+    /// shield damage
+    #[builder(setter(into), default)]
+    shield_damage: Option<f32>,
+    /// hull damage
+    #[builder(setter(into), default)]
+    hull_damage: Option<f32>,
+    /// heat damage
+    #[builder(setter(into), default)]
+    heat_damage: Option<f32>,
+    /// acceleration
+    #[builder(setter(into), default)]
+    pub acceleration: Option<f32>,
+    /// drag
+    #[builder(setter(into), default)]
+    pub drag: Option<f32>,
+    /// turn
+    #[builder(setter(into), default)]
+    pub turn: Option<f32>,
+    /// homing
+    #[builder(setter(into), default)]
+    pub homing: Option<f32>,
+    /// infrared tracking
+    #[builder(setter(into), default)]
+    pub infrared_tracking: Option<f32>,
+    /// radar tracking
+    #[builder(setter(into), default)]
+    pub radar_tracking: Option<f32>,
+    /// optical tracking
+    #[builder(setter(into), default)]
+    pub optical_tracking: Option<f32>,
+    /// trigger radius
+    #[builder(setter(into), default)]
+    pub trigger_radius: Option<f32>,
+    /// blast radius
+    #[builder(setter(into), default)]
+    pub blast_radius: Option<f32>,
+    /// missile strength
+    #[builder(setter(into), default)]
+    pub missile_strength: Option<f32>,
+    /// stream
+    #[builder(setter(into), default)]
+    pub stream: bool,
+    /// clustre
+    #[builder(setter(into), default)]
+    pub cluster: bool,
+    /// burst count
+    #[builder(setter(into), default)]
+    pub burst_count: Option<u32>,
+    /// burst reload
+    #[builder(setter(into), default)]
+    pub burst_reload: Option<u32>,
 }
 
 /// An effect
@@ -558,6 +717,9 @@ pub struct Effect<'a> {
     /// spin of the effect
     #[builder(setter(into), default)]
     random_spin: Option<f32>,
+    /// frame rate of the effect
+    #[builder(setter(into), default)]
+    random_frame_rate: Option<f32>,
     /// velocity of the effect
     #[builder(setter(into), default)]
     random_velocity: Option<f32>,

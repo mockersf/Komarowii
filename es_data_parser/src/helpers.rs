@@ -1,9 +1,11 @@
+use std::ops::Neg;
+
 use nom::{
     branch::alt,
     bytes::complete::tag,
     bytes::complete::take_until,
     character::complete::{char, digit1, line_ending, space1, tab},
-    combinator::cut,
+    combinator::{cut, opt},
     error::{context, ErrorKind, ParseError},
     sequence::{preceded, terminated, tuple},
     AsChar, IResult, InputTakeAtPosition,
@@ -73,7 +75,14 @@ where
 }
 
 pub fn integer_u32<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, u32, E> {
-    context("integer", digit1)(input).map(|(input, value)| (input, value.parse::<u32>().unwrap()))
+    context("integer u32", digit1)(input)
+        .map(|(input, value)| (input, value.parse::<u32>().unwrap()))
+}
+pub fn integer_i32<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, i32, E> {
+    context("integer i32", tuple((opt(tag("-")), digit1)))(input).map(|(input, (minus, value))| {
+        let value = value.parse::<i32>().unwrap();
+        (input, if minus.is_some() { value.neg() } else { value })
+    })
 }
 
 pub fn comment_hole<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, (), E> {
