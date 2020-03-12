@@ -6,7 +6,7 @@ pub struct Ship {
     /// it's sprite
     pub sprite: String,
     /// it's outfits
-    pub outfits: Vec<String>,
+    pub outfits: Vec<(String, u32)>,
     /// it's drag
     pub drag: f32,
     /// it's mass

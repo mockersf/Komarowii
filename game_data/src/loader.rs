@@ -127,7 +127,7 @@ impl<'a> UnresolvedESGameLoader {
                 outfits: ship
                     .outfits
                     .iter()
-                    .map(|outfit| outfit.0.to_string())
+                    .map(|outfit| (outfit.0.to_string(), outfit.1))
                     .collect(),
                 drag: ship.attributes.drag,
                 mass: ship.attributes.mass,
@@ -182,10 +182,12 @@ impl<'a> UnresolvedESGameLoader {
                 outfits: ship
                     .outfits
                     .into_iter()
-                    .filter_map(|outfit_name| {
-                        outfits.iter().find(|outfit| outfit.name == outfit_name)
+                    .filter_map(|unresolved_outfit| {
+                        outfits
+                            .iter()
+                            .find(|outfit| outfit.name == unresolved_outfit.0)
+                            .map(|outfit_found| (outfit_found.clone(), unresolved_outfit.1))
                     })
-                    .cloned()
                     .collect(),
             })
             .collect();

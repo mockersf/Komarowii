@@ -74,7 +74,7 @@ pub struct Ship {
     /// it's sprite
     pub sprite: String,
     /// it's outfits
-    pub outfits: Vec<Outfit>,
+    pub outfits: Vec<(Outfit, u32)>,
     /// it's drag
     pub drag: f32,
     /// it's mass
@@ -90,7 +90,11 @@ impl Ship {
     /// get mass of the ship plus it's outfits
     pub fn get_mass(&self) -> f32 {
         let mut total_mass: f32 = self.base_mass as f32;
-        total_mass += self.outfits.iter().map(|outfit| outfit.mass).sum::<f32>();
+        total_mass += self
+            .outfits
+            .iter()
+            .map(|outfit| outfit.0.mass * (outfit.1 as f32))
+            .sum::<f32>();
         max!(total_mass, 0.0)
     }
 
@@ -98,10 +102,10 @@ impl Ship {
     pub fn get_forward_thrust(&self) -> f32 {
         self.outfits
             .iter()
-            .flat_map(|outfit| outfit.engine.iter())
+            .flat_map(|outfit| outfit.0.engine.iter().map(move |engine| (engine, outfit.1)))
             .filter_map(|engine| {
-                if engine.ty == EngineType::Thrust {
-                    Some(engine.power)
+                if engine.0.ty == EngineType::Thrust {
+                    Some(engine.0.power * (engine.1 as f32))
                 } else {
                     None
                 }
@@ -113,10 +117,10 @@ impl Ship {
     pub fn get_turn(&self) -> f32 {
         self.outfits
             .iter()
-            .flat_map(|outfit| outfit.engine.iter())
+            .flat_map(|outfit| outfit.0.engine.iter().map(move |engine| (engine, outfit.1)))
             .filter_map(|engine| {
-                if engine.ty == EngineType::Turn {
-                    Some(engine.power)
+                if engine.0.ty == EngineType::Turn {
+                    Some(engine.0.power * (engine.1 as f32))
                 } else {
                     None
                 }
