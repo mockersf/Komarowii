@@ -122,9 +122,9 @@ pub struct Planet<'a> {
 #[builder(setter(into))]
 pub struct Position {
     /// x pos
-    pub x: f64,
+    pub x: f32,
     /// y pos
-    pub y: f64,
+    pub y: f32,
 }
 
 /// A galaxy

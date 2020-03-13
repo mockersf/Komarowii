@@ -5,7 +5,7 @@ use nom::{
     combinator::opt,
     error::{context, ParseError},
     multi::count,
-    number::complete::double,
+    number::complete::float,
     sequence::tuple,
     IResult,
 };
@@ -29,9 +29,9 @@ fn parse_pos<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Pos
         indent,
         tag("pos"),
         space1,
-        double,
+        float,
         space1,
-        double,
+        float,
         line_ending,
     ))(input)?;
 

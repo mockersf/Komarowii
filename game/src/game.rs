@@ -6,6 +6,7 @@ use helpers::{max, min, stringify_fn};
 
 use crate::square_of_background_stars::{self, SquareOfBackgroundStars};
 use crate::stellar_object::StellarObject;
+use crate::universe_map::UniverseMap;
 
 const ZOOM_MIN: f32 = 0.5;
 const ZOOM_MAX: f32 = 5.0;
@@ -25,6 +26,7 @@ pub struct Game {
     player: Player,
     zoom: f32,
     zoom_change: f32,
+    display_map: bool,
 }
 
 struct Player {
@@ -68,6 +70,7 @@ impl Game {
             },
             zoom: 1.0,
             zoom_change: 0.0,
+            display_map: false,
         }
     }
 
@@ -80,6 +83,17 @@ impl Game {
         state
             .map_mut(|state: &mut game_data::State| {
                 let game_data = state.current_game_or_new();
+
+                unsafe {
+                    let map = owner.get_node("universe_map".into());
+                    let map_instance: Instance<UniverseMap> =
+                        Instance::try_from_unsafe_base(map.unwrap()).unwrap();
+                    let map_script = map_instance.into_script();
+                    map_script
+                        .map_mut(|map| map.add_systems(&game_data.systems))
+                        .unwrap();
+                }
+
                 let days_since_beginning = game_data.get_nb_days_elapsed_since_beginning() as f32;
                 let mut object_parent = unsafe {
                     owner
@@ -326,12 +340,40 @@ impl Game {
     }
 
     #[export]
-    fn _input(&mut self, _owner: OwnerNode, event: InputEvent) {
+    fn _input(&mut self, owner: OwnerNode, event: InputEvent) {
         if let Some(iepg) = event.cast::<InputEventPanGesture>() {
             let delta = iepg.get_delta();
             if delta.x.abs() < 0.04 {
                 self.zoom_change = delta.y / 5.;
             }
         }
+        if let Some(iek) = event.cast::<InputEventKey>() {
+            if iek.is_pressed() && !iek.is_echo() && iek.get_scancode() == GlobalConstants::KEY_M {
+                self.toggle_map(owner);
+            }
+        }
+    }
+
+    fn toggle_map(&mut self, owner: OwnerNode) {
+        let state_node = unsafe { owner.get_node("/root/State".into()) };
+        let state_instance: Instance<game_data::State> =
+            unsafe { Instance::try_from_unsafe_base(state_node.unwrap()).unwrap() };
+        let state = state_instance.into_script();
+        state
+            .map_mut(|state| {
+                let game_data = state.current_game_or_new();
+                self.display_map = !self.display_map;
+                unsafe {
+                    let mut map = owner.get_node("universe_map".into()).unwrap();
+                    map.call_deferred(
+                        stringify_fn!(UniverseMap, set_map_visibility),
+                        &[
+                            self.display_map.to_variant(),
+                            game_data.player.current_system.position.to_variant(),
+                        ],
+                    );
+                }
+            })
+            .unwrap();
     }
 }

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://game/Game.gdns" type="Script" id=1]
+[ext_resource path="res://game/universe_map/universe_map.tscn" type="PackedScene" id=2]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 1 )
@@ -15,3 +16,5 @@ motion_scale = Vector2( 0.2, 0.2 )
 [node name="objects" type="Node2D" parent="."]
 
 [node name="ships" type="Node2D" parent="."]
+
+[node name="universe_map" parent="." instance=ExtResource( 2 )]

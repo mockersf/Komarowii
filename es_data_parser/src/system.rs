@@ -6,7 +6,7 @@ use nom::{
     error::{context, ParseError},
     multi::count,
     multi::many0,
-    number::complete::{double, float},
+    number::complete::float,
     sequence::tuple,
     IResult,
 };
@@ -75,9 +75,9 @@ fn parse_pos<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Pos
         indent,
         tag("pos"),
         space1,
-        double,
+        float,
         space1,
-        double,
+        float,
         line_ending,
     ))(input)?;
 

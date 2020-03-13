@@ -147,6 +147,7 @@ impl<'a> UnresolvedESGameLoader {
             .map(|system| System {
                 name: String::from(system.name),
                 objects: system.objects.iter().map(es_object_to_object).collect(),
+                position: euclid::vec2(system.pos.x, system.pos.y),
             })
             .collect::<Vec<_>>();
         self.systems.append(&mut systems);

@@ -152,10 +152,12 @@ pub struct Object {
 }
 
 /// A system
-#[derive(Debug, Clone)]
+#[derive(Debug, ToVariant, FromVariant, Clone)]
 pub struct System {
     /// it's name
     pub name: String,
     /// list of stellar object in it
     pub objects: Vec<Object>,
+    /// position of the system in the universe map
+    pub position: euclid::Vector2D<f32, euclid::UnknownUnit>,
 }
