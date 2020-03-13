@@ -25,8 +25,8 @@ impl UniverseMap {
         self.set_map_visibility(owner, false, euclid::vec2(0.0, 0.0));
     }
 
-    pub fn add_systems(&mut self, systems: &Vec<std::sync::Arc<game_data::data::System>>) {
-        self.systems = Some(systems.iter().cloned().collect());
+    pub fn add_systems(&mut self, systems: &[std::sync::Arc<game_data::data::System>]) {
+        self.systems = Some(systems.to_vec());
     }
 
     #[export]
