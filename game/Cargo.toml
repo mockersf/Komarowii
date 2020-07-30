@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 gdnative = "0.8"
-euclid = "0.20"
+euclid = "0.22"
 rand = "0.7.3"
 
 helpers = { path = "../helpers" }

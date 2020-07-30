@@ -9,7 +9,7 @@ license = "MIT"
 gdnative = "0.8"
 chrono = "0.4"
 rand = "0.7"
-euclid = "0.20"
+euclid = "0.22"
 
 es_data_parser = { path = "../es_data_parser" }
 helpers = { path = "../helpers" }
