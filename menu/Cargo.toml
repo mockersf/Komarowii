@@ -12,7 +12,7 @@ crate-type = ["cdylib"]
 [dependencies]
 gdnative = "0.8"
 euclid = "0.20"
-rand = "0.7.3"
+rand = "0.8.1"
 
 helpers = { path = "../helpers" }
 game_data = { path = "../game_data" }
