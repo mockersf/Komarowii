@@ -9,4 +9,4 @@ license = "MIT"
 
 [dependencies]
 nom = "5.1"
-derive_builder = "0.9"
+derive_builder = "0.10"
