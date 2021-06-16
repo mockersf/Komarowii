@@ -8,7 +8,7 @@ license = "MIT"
 [dependencies]
 gdnative = "0.8"
 chrono = "0.4"
-rand = "0.7"
+rand = "0.8"
 euclid = "0.20"
 
 es_data_parser = { path = "../es_data_parser" }
