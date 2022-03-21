@@ -10,7 +10,7 @@ license = "MIT"
 crate-type = ["cdylib"]
 
 [dependencies]
-gdnative = "0.8"
+gdnative = "0.10"
 euclid = "0.20"
 rand = "0.7.3"
 
