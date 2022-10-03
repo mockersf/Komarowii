@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT"
 
 [dependencies]
-gdnative = "0.8"
+gdnative = "0.11"
 chrono = "0.4"
 rand = "0.7"
 euclid = "0.20"
